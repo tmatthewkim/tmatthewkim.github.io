@@ -22,67 +22,67 @@ const NPCSystem = (() => {
     ];
 
     // Waypoint paths through the museum
+    // Layout: Grand Hall centered at (0,0), cross layout
+    // Trilobite west ~(-23,0), Archaeopteryx east ~(23,0), Neanderthal north ~(0,-23), Info south ~(0,23)
     const PATHS = [
-        // NPC 1: Lobby -> Trilobite -> Lobby -> Archaeopteryx -> loop
+        // NPC 1: Grand Hall -> Trilobite -> Grand Hall -> Archaeopteryx
         [
-            { x: 3, z: 3 },
-            { x: -5, z: 0 },
-            { x: -12, z: 0, pause: true },
-            { x: -18, z: -3, pause: true },
-            { x: -18, z: 3, pause: true },
-            { x: -12, z: 0 },
-            { x: -5, z: 0 },
-            { x: 3, z: -3 },
-            { x: 5, z: 0 },
-            { x: 12, z: 0, pause: true },
-            { x: 18, z: 3, pause: true },
-            { x: 12, z: 0 },
-            { x: 5, z: 0 },
-            { x: 3, z: 3 },
-        ],
-        // NPC 2: Lobby -> Neanderthal -> back
-        [
-            { x: -3, z: -3 },
-            { x: 0, z: -5 },
-            { x: 0, z: -12, pause: true },
-            { x: -3, z: -18, pause: true },
-            { x: 3, z: -18, pause: true },
-            { x: 0, z: -12 },
-            { x: 0, z: -5 },
-            { x: -3, z: 3 },
-            { x: 0, z: 5 },
-            { x: 0, z: 10, pause: true },
-            { x: 0, z: 5 },
-            { x: -3, z: -3 },
-        ],
-        // NPC 3: Wanders exhibit halls
-        [
+            { x: 4, z: 2 },
+            { x: -8, z: 0 },
+            { x: -18, z: 0, pause: true },
+            { x: -26, z: -4, pause: true },
+            { x: -26, z: 4, pause: true },
+            { x: -18, z: 0 },
+            { x: -8, z: 0 },
             { x: 4, z: -2 },
-            { x: 5, z: 0 },
-            { x: 14, z: 0, pause: true },
-            { x: 14, z: -3, pause: true },
-            { x: 14, z: 3, pause: true },
-            { x: 5, z: 0 },
-            { x: 0, z: -5 },
-            { x: 0, z: -15, pause: true },
-            { x: 3, z: -17, pause: true },
-            { x: 0, z: -10 },
-            { x: 0, z: -5 },
-            { x: -4, z: 2 },
+            { x: 8, z: 0 },
+            { x: 18, z: 0, pause: true },
+            { x: 26, z: 4, pause: true },
+            { x: 18, z: 0 },
+            { x: 8, z: 0 },
+            { x: 4, z: 2 },
         ],
-        // NPC 4: Slow wanderer in lobby and info wing
+        // NPC 2: Grand Hall -> Neanderthal -> Grand Hall
         [
-            { x: 2, z: 2 },
-            { x: -2, z: -2 },
-            { x: 2, z: -2 },
-            { x: 0, z: 5 },
-            { x: 0, z: 10, pause: true },
-            { x: 3, z: 12, pause: true },
-            { x: -3, z: 12, pause: true },
-            { x: 0, z: 8 },
-            { x: 0, z: 5 },
-            { x: -2, z: 2 },
-            { x: 2, z: 2 },
+            { x: -4, z: -4 },
+            { x: 0, z: -10 },
+            { x: 0, z: -18, pause: true },
+            { x: -4, z: -26, pause: true },
+            { x: 4, z: -26, pause: true },
+            { x: 0, z: -18 },
+            { x: 0, z: -10 },
+            { x: -4, z: 4 },
+            { x: 4, z: 4 },
+            { x: -4, z: -4 },
+        ],
+        // NPC 3: Wanders Archaeopteryx + Neanderthal
+        [
+            { x: 5, z: -2 },
+            { x: 8, z: 0 },
+            { x: 20, z: 0, pause: true },
+            { x: 24, z: -4, pause: true },
+            { x: 24, z: 4, pause: true },
+            { x: 8, z: 0 },
+            { x: 0, z: -10 },
+            { x: 0, z: -20, pause: true },
+            { x: 4, z: -26, pause: true },
+            { x: 0, z: -18 },
+            { x: 0, z: -10 },
+            { x: -5, z: 2 },
+        ],
+        // NPC 4: Grand Hall + Info Wing
+        [
+            { x: 3, z: 4 },
+            { x: -3, z: 6 },
+            { x: 3, z: 6 },
+            { x: 0, z: 10 },
+            { x: 0, z: 20, pause: true },
+            { x: 4, z: 26, pause: true },
+            { x: -4, z: 26, pause: true },
+            { x: 0, z: 20 },
+            { x: 0, z: 10 },
+            { x: -3, z: 4 },
+            { x: 3, z: 4 },
         ],
     ];
 
@@ -248,7 +248,7 @@ const NPCSystem = (() => {
             const newZ = pos.z + dirZ * moveSpeed;
 
             // Simple boundary check (stay within museum)
-            const maxBound = 22;
+            const maxBound = 45;
             if (Math.abs(newX) < maxBound && Math.abs(newZ) < maxBound) {
                 pos.x = newX;
                 pos.z = newZ;

@@ -19,21 +19,12 @@ const MUSEUM_DATA = {
 
     aboutMe: {
         title: "About Me",
-        content: `<p>I am a student at Stanford University pursuing the Notation in Science Communication.</p>
-<p>[Add your bio, interests, academic background, and what drives your passion for science communication here.]</p>`
+        content: `<p>I am a student at Stanford University pursuing the Notation in Science Communication.</p>`
     },
 
     aboutPortfolio: {
         title: "About This ePortfolio",
-        content: `<p>This ePortfolio was created as the capstone for the Notation in Science Communication (NSC) at Stanford University.</p>
-<p>Rather than using a traditional platform, I built this interactive 3D museum to reflect my belief that science communication should be engaging, immersive, and accessible. The museum metaphor allows visitors to explore my work at their own pace, just as one would wander through a real museum.</p>
-<p>Each wing is named after a fossil that symbolizes a stage of growth:</p>
-<ul style="margin: 1rem 0; padding-left: 1.5rem;">
-<li><strong>Trilobite</strong> — Early, foundational work</li>
-<li><strong>Archaeopteryx</strong> — Transitional pieces showing growth</li>
-<li><strong>Neanderthal</strong> — Advanced, complex engagement</li>
-</ul>
-<p>The artifacts within each wing are curated examples of my science communication work, accompanied by reflections that contextualize each piece within my learning journey.</p>`
+        content: `<p>This ePortfolio was created as the capstone for the Notation in Science Communication (NSC) at Stanford University.</p>`
     },
 
     exhibits: {
@@ -44,20 +35,20 @@ const MUSEUM_DATA = {
             artifacts: [
                 {
                     title: "Artifact 1: [Title]",
-                    content: "<p>[Description of your first artifact — what it is, when you created it, and its context.]</p>",
-                    reflection: "<p>[Your reflection on this artifact — what you learned, how it shaped your science communication skills, and what you would do differently.]</p>",
+                    content: "<p>[Description of first artifact]</p>",
+                    reflection: "<p>[Reflection on this artifact</p>",
                     image: null
                 },
                 {
                     title: "Artifact 2: [Title]",
-                    content: "<p>[Description of your second artifact.]</p>",
-                    reflection: "<p>[Your reflection on this artifact.]</p>",
+                    content: "<p>[Description of second artifact.]</p>",
+                    reflection: "<p>[Reflection on this artifact.]</p>",
                     image: null
                 },
                 {
                     title: "Artifact 3: [Title]",
-                    content: "<p>[Description of your third artifact.]</p>",
-                    reflection: "<p>[Your reflection on this artifact.]</p>",
+                    content: "<p>[Description of third artifact.]</p>",
+                    reflection: "<p>[Reflection on this artifact.]</p>",
                     image: null
                 }
             ]
@@ -69,20 +60,20 @@ const MUSEUM_DATA = {
             artifacts: [
                 {
                     title: "Artifact 1: [Title]",
-                    content: "<p>[Description of your artifact.]</p>",
-                    reflection: "<p>[Your reflection.]</p>",
+                    content: "<p>[Description of artifact.]</p>",
+                    reflection: "<p>[Reflection.]</p>",
                     image: null
                 },
                 {
                     title: "Artifact 2: [Title]",
-                    content: "<p>[Description of your artifact.]</p>",
-                    reflection: "<p>[Your reflection.]</p>",
+                    content: "<p>[Description of artifact.]</p>",
+                    reflection: "<p>[Reflection.]</p>",
                     image: null
                 },
                 {
                     title: "Artifact 3: [Title]",
-                    content: "<p>[Description of your artifact.]</p>",
-                    reflection: "<p>[Your reflection.]</p>",
+                    content: "<p>[Description of artifact.]</p>",
+                    reflection: "<p>[Reflection.]</p>",
                     image: null
                 }
             ]
@@ -94,20 +85,20 @@ const MUSEUM_DATA = {
             artifacts: [
                 {
                     title: "Artifact 1: [Title]",
-                    content: "<p>[Description of your artifact.]</p>",
-                    reflection: "<p>[Your reflection.]</p>",
+                    content: "<p>[Description of artifact.]</p>",
+                    reflection: "<p>[Reflection.]</p>",
                     image: null
                 },
                 {
                     title: "Artifact 2: [Title]",
-                    content: "<p>[Description of your artifact.]</p>",
-                    reflection: "<p>[Your reflection.]</p>",
+                    content: "<p>[Description of artifact.]</p>",
+                    reflection: "<p>[Reflection.]</p>",
                     image: null
                 },
                 {
                     title: "Artifact 3: [Title]",
-                    content: "<p>[Description of your artifact.]</p>",
-                    reflection: "<p>[Your reflection.]</p>",
+                    content: "<p>[Description of artifact.]</p>",
+                    reflection: "<p>[Reflection.]</p>",
                     image: null
                 }
             ]

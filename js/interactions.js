@@ -5,7 +5,7 @@
 
 const Interactions = (() => {
     const raycaster = new THREE.Raycaster();
-    raycaster.far = 6; // Max interaction distance
+    raycaster.far = 8; // Max interaction distance
 
     let hoveredExhibit = null;
     let overlayOpen = false;
@@ -150,7 +150,7 @@ const Interactions = (() => {
     function drawMinimap() {
         const w = minimapCanvas.width;
         const h = minimapCanvas.height;
-        const scale = 4; // pixels per unit
+        const scale = 1.8; // pixels per unit
         const cx = w / 2;
         const cy = h / 2;
 

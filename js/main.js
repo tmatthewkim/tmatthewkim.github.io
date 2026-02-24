@@ -16,8 +16,8 @@
 
     // ===================== THREE.JS SETUP =====================
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0a0a14);
-    scene.fog = new THREE.Fog(0x0a0a14, 15, 35);
+    scene.background = new THREE.Color(0x1a1814);
+    scene.fog = new THREE.Fog(0x1a1814, 20, 50);
 
     const camera = new THREE.PerspectiveCamera(
         70,
@@ -32,7 +32,7 @@
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
+    renderer.toneMappingExposure = 1.4;
     document.body.appendChild(renderer.domElement);
 
     // ===================== RESIZE HANDLER =====================
@@ -48,7 +48,7 @@
         const count = 200;
         const positions = new Float32Array(count * 3);
         const velocities = [];
-        const spread = 30;
+        const spread = 40;
 
         for (let i = 0; i < count; i++) {
             positions[i * 3] = (Math.random() - 0.5) * spread;
@@ -81,7 +81,7 @@
         if (!dustParticles) return;
         const positions = dustParticles.geometry.attributes.position.array;
         const velocities = dustParticles.userData.velocities;
-        const spread = 30;
+        const spread = 40;
 
         for (let i = 0; i < velocities.length; i++) {
             positions[i * 3] += velocities[i].x * delta;

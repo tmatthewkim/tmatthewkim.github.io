@@ -4,11 +4,11 @@
  */
 
 const Exhibits = (() => {
-    const FRAME_WIDTH = 2;
-    const FRAME_HEIGHT = 1.5;
+    const FRAME_WIDTH = 2.2;
+    const FRAME_HEIGHT = 1.7;
     const FRAME_DEPTH = 0.08;
-    const FRAME_BORDER = 0.1;
-    const FRAME_Y = 2.0;
+    const FRAME_BORDER = 0.12;
+    const FRAME_Y = 2.2;
 
     // All clickable exhibit meshes mapped to their data
     const exhibitMap = new Map();

@@ -28,7 +28,7 @@ const Player = (() => {
 
     function init(cam) {
         camera = cam;
-        camera.position.set(0, PLAYER_HEIGHT, 5);
+        camera.position.set(0, PLAYER_HEIGHT, 7);
         camera.rotation.order = 'YXZ';
 
         document.addEventListener('keydown', onKeyDown);
