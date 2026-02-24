@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NSC ePortfolio — Museum of Science Communication</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-content">
+            <h1>Museum of Science Communication</h1>
+            <p>NSC ePortfolio</p>
+            <div class="loading-bar">
+                <div class="loading-fill" id="loading-fill"></div>
+            </div>
+            <p id="loading-text">Loading museum...</p>
+        </div>
+    </div>
+
+    <!-- Start Screen (after loading) -->
+    <div id="start-screen" style="display:none;">
+        <div class="start-content">
+            <h1>Museum of Science Communication</h1>
+            <h2>An NSC ePortfolio</h2>
+            <p class="start-instructions">
+                <strong>Controls:</strong><br>
+                <span class="key">W A S D</span> or <span class="key">Arrow Keys</span> — Move<br>
+                <span class="key">Mouse</span> — Look around<br>
+                <span class="key">Click</span> — View exhibits<br>
+                <span class="key">ESC</span> — Close / Release mouse
+            </p>
+            <button id="start-button">Enter Museum</button>
+        </div>
+    </div>
+
+    <!-- HUD -->
+    <div id="hud" style="display:none;">
+        <div id="room-label">Lobby</div>
+        <div id="crosshair">+</div>
+        <div id="interact-prompt" style="display:none;">Click to view</div>
+        <canvas id="minimap" width="180" height="180"></canvas>
+    </div>
+
+    <!-- Exhibit Overlay -->
+    <div id="exhibit-overlay" style="display:none;">
+        <div class="overlay-content">
+            <button id="overlay-close">&times;</button>
+            <h2 id="overlay-title"></h2>
+            <div id="overlay-body"></div>
+        </div>
+    </div>
+
+    <!-- Mobile Fallback -->
+    <div id="mobile-fallback" style="display:none;"></div>
+
+    <!-- Three.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- App Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/museum.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/exhibits.js"></script>
+    <script src="js/interactions.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
