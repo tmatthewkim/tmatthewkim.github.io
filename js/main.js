@@ -42,11 +42,70 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
+    // ===================== DUST PARTICLE SYSTEM =====================
+    let dustParticles;
+    function createDustParticles() {
+        const count = 200;
+        const positions = new Float32Array(count * 3);
+        const velocities = [];
+        const spread = 30;
+
+        for (let i = 0; i < count; i++) {
+            positions[i * 3] = (Math.random() - 0.5) * spread;
+            positions[i * 3 + 1] = Math.random() * Museum.WALL_HEIGHT;
+            positions[i * 3 + 2] = (Math.random() - 0.5) * spread;
+            velocities.push({
+                x: (Math.random() - 0.5) * 0.1,
+                y: (Math.random() - 0.5) * 0.05,
+                z: (Math.random() - 0.5) * 0.1
+            });
+        }
+
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+        const mat = new THREE.PointsMaterial({
+            color: 0xffe8cc,
+            size: 0.03,
+            transparent: true,
+            opacity: 0.4,
+            sizeAttenuation: true
+        });
+
+        dustParticles = new THREE.Points(geo, mat);
+        dustParticles.userData.velocities = velocities;
+        scene.add(dustParticles);
+    }
+
+    function updateDustParticles(delta) {
+        if (!dustParticles) return;
+        const positions = dustParticles.geometry.attributes.position.array;
+        const velocities = dustParticles.userData.velocities;
+        const spread = 30;
+
+        for (let i = 0; i < velocities.length; i++) {
+            positions[i * 3] += velocities[i].x * delta;
+            positions[i * 3 + 1] += velocities[i].y * delta;
+            positions[i * 3 + 2] += velocities[i].z * delta;
+
+            // Wrap around bounds
+            if (Math.abs(positions[i * 3]) > spread / 2) positions[i * 3] *= -0.9;
+            if (positions[i * 3 + 1] < 0 || positions[i * 3 + 1] > Museum.WALL_HEIGHT) velocities[i].y *= -1;
+            if (Math.abs(positions[i * 3 + 2]) > spread / 2) positions[i * 3 + 2] *= -0.9;
+
+            // Gentle drift change
+            if (Math.random() < 0.01) {
+                velocities[i].x += (Math.random() - 0.5) * 0.02;
+                velocities[i].z += (Math.random() - 0.5) * 0.02;
+            }
+        }
+        dustParticles.geometry.attributes.position.needsUpdate = true;
+    }
+
     // ===================== BUILD MUSEUM =====================
     const loadingFill = document.getElementById('loading-fill');
     const loadingText = document.getElementById('loading-text');
 
-    // Simulate loading steps
     let loadProgress = 0;
     function updateLoading(progress, text) {
         loadProgress = progress;
@@ -56,26 +115,28 @@
 
     updateLoading(10, 'Building museum walls...');
 
-    // Build the museum geometry
     const museumResult = Museum.build(scene);
-    updateLoading(40, 'Placing exhibits...');
+    updateLoading(35, 'Placing exhibits...');
 
-    // Place exhibits in halls
     Exhibits.placeExhibitsInHall(scene, museumResult.halls.trilobite, 'trilobite');
-    updateLoading(55, 'Placing exhibits...');
+    updateLoading(45, 'Placing exhibits...');
 
     Exhibits.placeExhibitsInHall(scene, museumResult.halls.archaeopteryx, 'archaeopteryx');
-    updateLoading(70, 'Placing exhibits...');
+    updateLoading(55, 'Placing exhibits...');
 
     Exhibits.placeExhibitsInHall(scene, museumResult.halls.neanderthal, 'neanderthal');
-    updateLoading(80, 'Setting up info wing...');
+    updateLoading(65, 'Setting up info wing...');
 
-    // Place info exhibits
     Exhibits.placeInfoExhibits(scene, museumResult.halls.info);
-    updateLoading(85, 'Setting up cover letter...');
+    updateLoading(72, 'Setting up cover letter...');
 
-    // Place cover letter
     Exhibits.placeCoverLetterExhibit(scene, museumResult.coverLetterDisplay);
+    updateLoading(78, 'Creating atmosphere...');
+
+    createDustParticles();
+    updateLoading(85, 'Populating museum visitors...');
+
+    NPCSystem.init(scene);
     updateLoading(95, 'Initializing controls...');
 
     // ===================== INIT SYSTEMS =====================
@@ -115,6 +176,8 @@
 
         Player.update(delta, Museum.getCollisionWalls());
         Interactions.update();
+        NPCSystem.update(delta, Museum.getCollisionWalls());
+        updateDustParticles(delta);
 
         renderer.render(scene, camera);
     }
