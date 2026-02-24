@@ -6,14 +6,15 @@
 
 const MUSEUM_DATA = {
     coverLetter: {
-        title: "Welcome to My Museum",
-        content: `<p>Welcome to my Museum of Science Communication — an ePortfolio for the Notation in Science Communication at Stanford University.</p>
-<p>This museum is organized into three wings, each named after a fossil that represents a different era of my growth as a science communicator:</p>
-<p><strong>Trilobite</strong> — Foundational work. Like the trilobite, one of Earth's earliest complex organisms, these artifacts represent my first forays into communicating science to broader audiences.</p>
-<p><strong>Archaeopteryx</strong> — Transitional growth. Just as Archaeopteryx bridges dinosaurs and modern birds, these pieces show my evolution from basic science writing toward more sophisticated, multimodal communication.</p>
-<p><strong>Neanderthal</strong> — Advanced engagement. Neanderthals were complex, social beings who created art and used tools — these artifacts demonstrate my most developed work in engaging diverse audiences with science.</p>
-<p>I invite you to explore each wing, view the artifacts on display, and read my reflections on how each piece has shaped my journey as a science communicator.</p>
-<p><em>Use WASD to walk through the museum and click on any exhibit to learn more.</em></p>`
+        title: "Cover Letter",
+        content: `<p>We can learn a lot about humans from dead birds.</p>
+<p>Not <em>those</em> birds, rather the extinct kind: dinosaurs. A particularly poignant example is Sue the Tyrannosaurus Rex. She is a skeleton of scars. Lumps on her ribs. An oversized leg bone. Punctured holes on her lower jaw. These oddities on her bones are not superficial marks but deep-rooted pains forgotten for 67 million years and only rediscovered by chance in the South Dakota Badlands. Broken ribs. An infected fibula. Holes of the parasitic infection trichomonosis... eventually leading to death by starvation. These scars tell a tale of struggles and downfalls that seem too much to bear.</p>
+<p>Growing up in the quiet village of Skokie, Illinois, the prolonging dullness of my childhood was quelled by the excitement I found in dinosaurs. What began as fascination transformed into curiosity: not just what happened to them, but how bodies record trauma and adapt to survive. Through fossils, I learned to read bones as narratives of resilience, vulnerability, and life.</p>
+<p>That curiosity eventually turned inward.</p>
+<p>If ancient bones could reveal so much about pain and survival, what could living bodies teach us?</p>
+<p>This question drew me toward the human body and ultimately to medicine \u2013 not to study anatomy and physiology in isolation but to understand people through their stories.</p>
+<p>I first entered Stanford University as a strict pre-medical student, but after my experience as a Hoover Student Fellow at the Hoover Institution studying research security, I became further captivated by the intertwined nature of science, technology, and law for real societal effects. Since then, I have pursued opportunities in science to learn discovery, engineering to learn technical skills, and international security to learn deployment of innovation to benefit the greater public. Throughout these experiences, it has only become more evident to me the power of communication in bridging gaps between disparate stakeholders as a means to combine forces for the greatest impact possible.</p>
+<p>My goal in pursuing the Notation in Science Communication is to learn and reflect on how to become a better advocate of science and technology. I believe no field is truly isolated and that recognizing the interdisciplinarity of the world is the key for future progress, just like how Sue communicated to me how to become a better human.</p>`
     },
 
     aboutMe: {
