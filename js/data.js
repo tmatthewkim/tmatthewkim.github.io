@@ -72,7 +72,7 @@ const MUSEUM_DATA = {
     aboutPortfolio: {
         title: "About This ePortfolio",
         content: '<h3 style="color:#c9a96e; margin:0 0 0.5rem;">Purpose</h3>' +
-            '<p>This ePortfolio is the capstone project for my Notation in Science Communication (NSC) at Stanford University. It brings together nine artifacts spanning three thematic categories \u2014 Reveal, Bridge, and Build \u2014 each accompanied by reflections on the rhetorical choices, audience considerations, and lessons learned during their creation. Together, they document my growth as a science communicator across multimedia, policy, and technical contexts.</p>' +
+            '<p>This ePortfolio is the capstone project for my Notation in Science Communication (NSC) at Stanford University. It brings together nine artifacts spanning three thematic categories \u2014 Trilobite, Archaeopteryx, and Neanderthal \u2014 each accompanied by reflections on the rhetorical choices, audience considerations, and lessons learned during their creation. Together, they document my growth as a science communicator across multimedia, policy, and technical contexts.</p>' +
 
             '<h3 style="color:#c9a96e; margin:0 0 0.5rem;">Design</h3>' +
             '<p>This ePortfolio is presented as an interactive 3D museum visitors can walk through, built with <strong>Three.js</strong> (r128). Each wing of the museum corresponds to a thematic category, and exhibits are displayed as framed artworks on the walls. The museum metaphor was chosen to evoke the experience of discovery and curation, reinforcing the idea that each artifact is a carefully placed exhibit in a larger narrative.</p>' +
