@@ -1,180 +1,242 @@
 /**
  * NPC SYSTEM
- * Simple humanoid figures that walk around the museum,
+ * Diverse humanoid figures that walk around the museum with collision detection,
  * pausing at exhibits to give the space a lived-in feel.
  */
 
 const NPCSystem = (() => {
     const NPC_SPEED = 1.2;
     const NPC_HEIGHT = 1.65;
-    const PAUSE_TIME = 4; // seconds to pause at waypoints
-    const NPC_RADIUS = 0.3;
+    const PAUSE_TIME = 4;
+    const NPC_RADIUS = 0.35;
 
     const npcs = [];
     const allNPCMeshes = [];
 
-    // Muted, natural clothing colors
+    // Diverse outfits with varied skin tones, hair, and body types
     const OUTFITS = [
-        { body: 0x3a4a5c, pants: 0x2a2a35, skin: 0xd4a574, hair: 0x2c1810 },
-        { body: 0x6b4c3b, pants: 0x333340, skin: 0xc68642, hair: 0x1a1a1a },
-        { body: 0x4a5a4a, pants: 0x35302a, skin: 0xe8c4a0, hair: 0x8b6914 },
-        { body: 0x5c3a3a, pants: 0x2a2a2a, skin: 0xb87333, hair: 0x1c1008 },
+        // Woman, dark skin, natural hair
+        { body: 0x8b3a3a, pants: 0x2a2a35, skin: 0x6b3e26, hair: 0x1a1008, hairStyle: 'afro', gender: 'f', height: 0.95 },
+        // Man, light skin, brown hair
+        { body: 0x3a4a5c, pants: 0x333340, skin: 0xe0b894, hair: 0x5c3a1e, hairStyle: 'short', gender: 'm', height: 1.02 },
+        // Woman, East Asian, black hair, long
+        { body: 0x4a5a6a, pants: 0x35302a, skin: 0xf0ce98, hair: 0x0e0e0e, hairStyle: 'long', gender: 'f', height: 0.93 },
+        // Man, South Asian, dark hair
+        { body: 0x5c4a3a, pants: 0x2a2a2a, skin: 0xb87a4a, hair: 0x101010, hairStyle: 'short', gender: 'm', height: 1.0 },
+        // Woman, medium-brown skin, auburn hair
+        { body: 0x6b5a6b, pants: 0x303038, skin: 0xc88c5c, hair: 0x6b2e14, hairStyle: 'bun', gender: 'f', height: 0.96 },
+        // Man, dark skin, short hair
+        { body: 0x3a5a4a, pants: 0x282830, skin: 0x5a3420, hair: 0x0a0806, hairStyle: 'short', gender: 'm', height: 1.04 },
     ];
 
     // Waypoint paths through the museum
-    // Layout: Grand Hall centered at (0,0), cross layout
-    // Trilobite west ~(-23,0), Archaeopteryx east ~(23,0), Neanderthal north ~(0,-23), Info south ~(0,23)
+    // DOORS at: West x=-12 z=0, East x=12 z=0, North x=0 z=-12, South x=0 z=12
+    // Door width 4.5 — NPCs must pass through center (z≈0 or x≈0) at doors
+    // Benches at: (-18,0), (18,0), (0,-18), (0,18)
+    // Fossils at wing centers: (-23,0), (23,0), (0,-23)
     const PATHS = [
         // NPC 1: Grand Hall -> Trilobite -> Grand Hall -> Archaeopteryx
         [
             { x: 4, z: 2 },
-            { x: -8, z: 0 },
-            { x: -18, z: 0, pause: true },
+            { x: -6, z: 1 },
+            { x: -12, z: 0 },          // through west door
+            { x: -16, z: -4, pause: true },
             { x: -26, z: -4, pause: true },
             { x: -26, z: 4, pause: true },
-            { x: -18, z: 0 },
-            { x: -8, z: 0 },
-            { x: 4, z: -2 },
-            { x: 8, z: 0 },
-            { x: 18, z: 0, pause: true },
+            { x: -16, z: 4 },
+            { x: -12, z: 0 },          // back through west door
+            { x: -4, z: -1 },
+            { x: 6, z: -1 },
+            { x: 12, z: 0 },           // through east door
+            { x: 16, z: -4, pause: true },
             { x: 26, z: 4, pause: true },
-            { x: 18, z: 0 },
-            { x: 8, z: 0 },
+            { x: 16, z: 4 },
+            { x: 12, z: 0 },           // back through east door
             { x: 4, z: 2 },
         ],
         // NPC 2: Grand Hall -> Neanderthal -> Grand Hall
         [
-            { x: -4, z: -4 },
-            { x: 0, z: -10 },
-            { x: 0, z: -18, pause: true },
+            { x: -3, z: -4 },
+            { x: -1, z: -8 },
+            { x: 0, z: -12 },          // through north door
+            { x: -4, z: -16, pause: true },
             { x: -4, z: -26, pause: true },
             { x: 4, z: -26, pause: true },
-            { x: 0, z: -18 },
-            { x: 0, z: -10 },
-            { x: -4, z: 4 },
-            { x: 4, z: 4 },
-            { x: -4, z: -4 },
+            { x: 4, z: -16 },
+            { x: 0, z: -12 },          // back through north door
+            { x: 2, z: -6 },
+            { x: 3, z: 3 },
+            { x: -3, z: -4 },
         ],
-        // NPC 3: Wanders Archaeopteryx + Neanderthal
+        // NPC 3: Archaeopteryx + Neanderthal
         [
-            { x: 5, z: -2 },
-            { x: 8, z: 0 },
-            { x: 20, z: 0, pause: true },
-            { x: 24, z: -4, pause: true },
-            { x: 24, z: 4, pause: true },
-            { x: 8, z: 0 },
-            { x: 0, z: -10 },
-            { x: 0, z: -20, pause: true },
-            { x: 4, z: -26, pause: true },
-            { x: 0, z: -18 },
-            { x: 0, z: -10 },
+            { x: 5, z: -1 },
+            { x: 12, z: 0 },           // through east door
+            { x: 20, z: -4, pause: true },
+            { x: 26, z: -4, pause: true },
+            { x: 26, z: 4, pause: true },
+            { x: 20, z: 4 },
+            { x: 12, z: 0 },           // back through east door
+            { x: 2, z: -4 },
+            { x: 0, z: -12 },          // through north door
+            { x: 4, z: -20, pause: true },
+            { x: -4, z: -26, pause: true },
+            { x: -4, z: -16 },
+            { x: 0, z: -12 },          // back through north door
+            { x: -2, z: -4 },
             { x: -5, z: 2 },
         ],
         // NPC 4: Grand Hall + Info Wing
         [
-            { x: 3, z: 4 },
-            { x: -3, z: 6 },
-            { x: 3, z: 6 },
-            { x: 0, z: 10 },
-            { x: 0, z: 20, pause: true },
+            { x: 3, z: 3 },
+            { x: -3, z: 3 },
+            { x: 1, z: 8 },
+            { x: 0, z: 12 },           // through south door
+            { x: 4, z: 20, pause: true },
             { x: 4, z: 26, pause: true },
             { x: -4, z: 26, pause: true },
-            { x: 0, z: 20 },
-            { x: 0, z: 10 },
-            { x: -3, z: 4 },
-            { x: 3, z: 4 },
+            { x: -4, z: 20 },
+            { x: 0, z: 12 },           // back through south door
+            { x: -1, z: 6 },
+            { x: 3, z: 3 },
+        ],
+        // NPC 5: Trilobite + Info
+        [
+            { x: -5, z: 2 },
+            { x: -8, z: 0 },
+            { x: -12, z: 0 },          // through west door
+            { x: -20, z: -4, pause: true },
+            { x: -26, z: -4, pause: true },
+            { x: -20, z: 4 },
+            { x: -12, z: 0 },          // back through west door
+            { x: -4, z: 4 },
+            { x: -1, z: 8 },
+            { x: 0, z: 12 },           // through south door
+            { x: -4, z: 20, pause: true },
+            { x: 0, z: 12 },           // back through south door
+            { x: -2, z: 6 },
+            { x: -5, z: 2 },
+        ],
+        // NPC 6: Grand Hall wanderer (stays in center area)
+        [
+            { x: 5, z: -3 },
+            { x: -5, z: -3 },
+            { x: -5, z: 3, pause: true },
+            { x: 5, z: 3 },
+            { x: 5, z: -3 },
         ],
     ];
 
     function createNPCMesh(outfit) {
         const group = new THREE.Group();
+        const sc = outfit.height || 1;
 
-        const skinMat = new THREE.MeshStandardMaterial({
-            color: outfit.skin, roughness: 0.8, metalness: 0
-        });
-        const bodyMat = new THREE.MeshStandardMaterial({
-            color: outfit.body, roughness: 0.7, metalness: 0.05
-        });
-        const pantsMat = new THREE.MeshStandardMaterial({
-            color: outfit.pants, roughness: 0.8, metalness: 0.05
-        });
-        const hairMat = new THREE.MeshStandardMaterial({
-            color: outfit.hair, roughness: 0.9, metalness: 0
-        });
+        const skinMat = new THREE.MeshStandardMaterial({ color: outfit.skin, roughness: 0.8, metalness: 0 });
+        const bodyMat = new THREE.MeshStandardMaterial({ color: outfit.body, roughness: 0.7, metalness: 0.05 });
+        const pantsMat = new THREE.MeshStandardMaterial({ color: outfit.pants, roughness: 0.8, metalness: 0.05 });
+        const hairMat = new THREE.MeshStandardMaterial({ color: outfit.hair, roughness: 0.9, metalness: 0 });
+        const shoeMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.5 });
+
+        const isFemale = outfit.gender === 'f';
+        const shoulderW = isFemale ? 0.28 : 0.34;
+        const hipW = isFemale ? 0.26 : 0.28;
 
         // Head
         const head = new THREE.Mesh(new THREE.SphereGeometry(0.13, 10, 10), skinMat);
-        head.position.y = 1.52;
+        head.position.y = 1.52 * sc;
         head.castShadow = true;
         group.add(head);
 
-        // Hair (slightly larger half-sphere on top)
-        const hair = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 10, 0, Math.PI * 2, 0, Math.PI / 2), hairMat);
-        hair.position.y = 1.55;
-        group.add(hair);
+        // Hair based on style
+        if (outfit.hairStyle === 'afro') {
+            const afro = new THREE.Mesh(new THREE.SphereGeometry(0.18, 10, 10), hairMat);
+            afro.position.y = 1.56 * sc;
+            afro.scale.set(1, 0.85, 1);
+            group.add(afro);
+        } else if (outfit.hairStyle === 'long') {
+            // Top cap - slightly larger than head, only top hemisphere
+            const top = new THREE.Mesh(new THREE.SphereGeometry(0.135, 10, 10, 0, Math.PI * 2, 0, Math.PI * 0.55), hairMat);
+            top.position.y = 1.52 * sc;
+            group.add(top);
+            // Back hair flowing down - connects to head, tapers down
+            const back = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.08, 0.28, 8), hairMat);
+            back.position.set(0, 1.37 * sc, -0.10);
+            group.add(back);
+        } else if (outfit.hairStyle === 'bun') {
+            // Top cap - slightly larger than head, only top hemisphere
+            const top = new THREE.Mesh(new THREE.SphereGeometry(0.135, 10, 10, 0, Math.PI * 2, 0, Math.PI * 0.55), hairMat);
+            top.position.y = 1.52 * sc;
+            group.add(top);
+            // Small bun on top-back of head
+            const bun = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), hairMat);
+            bun.position.set(0, 1.60 * sc, -0.10);
+            group.add(bun);
+        } else {
+            // Short hair (default) - tight cap on top of head
+            const hair = new THREE.Mesh(new THREE.SphereGeometry(0.135, 10, 10, 0, Math.PI * 2, 0, Math.PI * 0.45), hairMat);
+            hair.position.y = 1.52 * sc;
+            group.add(hair);
+        }
 
         // Neck
         const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 0.1, 8), skinMat);
-        neck.position.y = 1.38;
+        neck.position.y = 1.38 * sc;
         group.add(neck);
 
-        // Torso (upper body)
-        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.35, 0.18), bodyMat);
-        torso.position.y = 1.15;
+        // Torso
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(shoulderW, 0.35, 0.18), bodyMat);
+        torso.position.y = 1.15 * sc;
         torso.castShadow = true;
         group.add(torso);
 
-        // Lower torso / hips
-        const hips = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.15, 0.16), pantsMat);
-        hips.position.y = 0.9;
+        // Hips
+        const hips = new THREE.Mesh(new THREE.BoxGeometry(hipW, 0.15, 0.16), pantsMat);
+        hips.position.y = 0.9 * sc;
         group.add(hips);
 
-        // Left arm
-        const leftArm = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.35, 0.08), bodyMat);
-        leftArm.position.set(-0.2, 1.12, 0);
-        leftArm.castShadow = true;
+        // Arms
+        const armW = isFemale ? 0.07 : 0.08;
+        const armOff = shoulderW / 2 + armW / 2;
+        const leftArm = new THREE.Mesh(new THREE.BoxGeometry(armW, 0.33, armW), bodyMat);
+        leftArm.position.set(-armOff, 1.12 * sc, 0);
+        leftArm.name = 'leftArm';
         group.add(leftArm);
 
-        // Right arm
-        const rightArm = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.35, 0.08), bodyMat);
-        rightArm.position.set(0.2, 1.12, 0);
-        rightArm.castShadow = true;
+        const rightArm = new THREE.Mesh(new THREE.BoxGeometry(armW, 0.33, armW), bodyMat);
+        rightArm.position.set(armOff, 1.12 * sc, 0);
+        rightArm.name = 'rightArm';
         group.add(rightArm);
 
-        // Left hand
-        const leftHand = new THREE.Mesh(new THREE.SphereGeometry(0.04, 6, 6), skinMat);
-        leftHand.position.set(-0.2, 0.92, 0);
+        // Hands
+        const leftHand = new THREE.Mesh(new THREE.SphereGeometry(0.035, 6, 6), skinMat);
+        leftHand.position.set(-armOff, 0.93 * sc, 0);
+        leftHand.name = 'leftHand';
         group.add(leftHand);
 
-        // Right hand
-        const rightHand = new THREE.Mesh(new THREE.SphereGeometry(0.04, 6, 6), skinMat);
-        rightHand.position.set(0.2, 0.92, 0);
+        const rightHand = new THREE.Mesh(new THREE.SphereGeometry(0.035, 6, 6), skinMat);
+        rightHand.position.set(armOff, 0.93 * sc, 0);
+        rightHand.name = 'rightHand';
         group.add(rightHand);
 
-        // Left leg
+        // Legs
         const leftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.4, 0.1), pantsMat);
-        leftLeg.position.set(-0.08, 0.62, 0);
+        leftLeg.position.set(-0.08, 0.62 * sc, 0);
         leftLeg.name = 'leftLeg';
-        leftLeg.castShadow = true;
         group.add(leftLeg);
 
-        // Right leg
         const rightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.4, 0.1), pantsMat);
-        rightLeg.position.set(0.08, 0.62, 0);
+        rightLeg.position.set(0.08, 0.62 * sc, 0);
         rightLeg.name = 'rightLeg';
-        rightLeg.castShadow = true;
         group.add(rightLeg);
 
-        // Left shoe
-        const shoeMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.5 });
+        // Shoes
         const leftShoe = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.06, 0.16), shoeMat);
-        leftShoe.position.set(-0.08, 0.4, 0.02);
+        leftShoe.position.set(-0.08, 0.4 * sc, 0.02);
         leftShoe.name = 'leftShoe';
         group.add(leftShoe);
 
-        // Right shoe
         const rightShoe = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.06, 0.16), shoeMat);
-        rightShoe.position.set(0.08, 0.4, 0.02);
+        rightShoe.position.set(0.08, 0.4 * sc, 0.02);
         rightShoe.name = 'rightShoe';
         group.add(rightShoe);
 
@@ -186,7 +248,6 @@ const NPCSystem = (() => {
             const outfit = OUTFITS[i % OUTFITS.length];
             const mesh = createNPCMesh(outfit);
             mesh.position.set(path[0].x, 0, path[0].z);
-            mesh.castShadow = true;
             scene.add(mesh);
 
             npcs.push({
@@ -195,12 +256,28 @@ const NPCSystem = (() => {
                 currentWaypoint: 0,
                 pauseTimer: 0,
                 isPaused: false,
-                walkTime: Math.random() * 10, // offset animation phase
-                speed: NPC_SPEED * (0.8 + Math.random() * 0.4) // slight speed variation
+                walkTime: Math.random() * 10,
+                speed: NPC_SPEED * (0.8 + Math.random() * 0.4),
+                stuckTimer: 0
             });
 
             allNPCMeshes.push(mesh);
         });
+    }
+
+    // Check NPC collision against museum walls
+    function checkNPCCollision(x, z, walls) {
+        const bb = new THREE.Box3(
+            new THREE.Vector3(x - NPC_RADIUS, 0, z - NPC_RADIUS),
+            new THREE.Vector3(x + NPC_RADIUS, NPC_HEIGHT, z + NPC_RADIUS)
+        );
+        for (const wall of walls) {
+            if (!wall.geometry.boundingBox) wall.geometry.computeBoundingBox();
+            const wbb = wall.geometry.boundingBox.clone();
+            wbb.applyMatrix4(wall.matrixWorld);
+            if (bb.intersectsBox(wbb)) return true;
+        }
+        return false;
     }
 
     function update(delta, walls) {
@@ -211,10 +288,12 @@ const NPCSystem = (() => {
                     npc.isPaused = false;
                     npc.currentWaypoint = (npc.currentWaypoint + 1) % npc.path.length;
                 }
-                // Idle animation - slight body sway
+                // Idle sway
                 npc.walkTime += delta * 0.5;
                 const sway = Math.sin(npc.walkTime) * 0.01;
                 npc.mesh.rotation.y += sway * delta;
+                // Keep on floor
+                npc.mesh.position.y = 0;
                 return;
             }
 
@@ -224,18 +303,18 @@ const NPCSystem = (() => {
             const dz = target.z - pos.z;
             const dist = Math.sqrt(dx * dx + dz * dz);
 
-            if (dist < 0.3) {
-                // Reached waypoint
+            if (dist < 0.5) {
                 if (target.pause) {
                     npc.isPaused = true;
                     npc.pauseTimer = PAUSE_TIME + Math.random() * 2;
+                    npc.stuckTimer = 0;
                 } else {
                     npc.currentWaypoint = (npc.currentWaypoint + 1) % npc.path.length;
+                    npc.stuckTimer = 0;
                 }
                 return;
             }
 
-            // Move toward target
             const dirX = dx / dist;
             const dirZ = dz / dist;
             const moveSpeed = npc.speed * delta;
@@ -243,26 +322,47 @@ const NPCSystem = (() => {
             // Face movement direction
             npc.mesh.rotation.y = Math.atan2(dirX, dirZ);
 
-            // Try movement with simple collision check
             const newX = pos.x + dirX * moveSpeed;
             const newZ = pos.z + dirZ * moveSpeed;
 
-            // Simple boundary check (stay within museum)
-            const maxBound = 45;
-            if (Math.abs(newX) < maxBound && Math.abs(newZ) < maxBound) {
+            // Check collision against walls
+            const blocked = checkNPCCollision(newX, newZ, walls);
+
+            if (!blocked) {
                 pos.x = newX;
                 pos.z = newZ;
+                npc.stuckTimer = 0;
             } else {
-                // Skip to next waypoint if stuck
-                npc.currentWaypoint = (npc.currentWaypoint + 1) % npc.path.length;
+                // Try X only
+                if (!checkNPCCollision(newX, pos.z, walls)) {
+                    pos.x = newX;
+                    npc.stuckTimer = 0;
+                } else if (!checkNPCCollision(pos.x, newZ, walls)) {
+                    // Try Z only
+                    pos.z = newZ;
+                    npc.stuckTimer = 0;
+                } else {
+                    // Fully blocked — try perpendicular dodge
+                    const perpX = pos.x + dirZ * moveSpeed;
+                    const perpZ = pos.z - dirX * moveSpeed;
+                    if (!checkNPCCollision(perpX, perpZ, walls)) {
+                        pos.x = perpX;
+                        pos.z = perpZ;
+                        npc.stuckTimer = 0;
+                    } else {
+                        npc.stuckTimer += delta;
+                        if (npc.stuckTimer > 0.8) {
+                            // Skip waypoint quickly if truly stuck
+                            npc.currentWaypoint = (npc.currentWaypoint + 1) % npc.path.length;
+                            npc.stuckTimer = 0;
+                        }
+                    }
+                }
             }
 
             // Walking animation
             npc.walkTime += delta * 6;
-            const legSwing = Math.sin(npc.walkTime) * 0.25;
-            const armSwing = Math.sin(npc.walkTime) * 0.15;
 
-            // Animate legs
             npc.mesh.children.forEach(child => {
                 if (child.name === 'leftLeg' || child.name === 'leftShoe') {
                     child.position.z = (child.name === 'leftShoe' ? 0.02 : 0) + Math.sin(npc.walkTime) * 0.08;
@@ -270,10 +370,16 @@ const NPCSystem = (() => {
                 if (child.name === 'rightLeg' || child.name === 'rightShoe') {
                     child.position.z = (child.name === 'rightShoe' ? 0.02 : 0) + Math.sin(npc.walkTime + Math.PI) * 0.08;
                 }
+                if (child.name === 'leftArm' || child.name === 'leftHand') {
+                    child.position.z = Math.sin(npc.walkTime + Math.PI) * 0.05;
+                }
+                if (child.name === 'rightArm' || child.name === 'rightHand') {
+                    child.position.z = Math.sin(npc.walkTime) * 0.05;
+                }
             });
 
-            // Subtle body bob
-            npc.mesh.position.y = Math.abs(Math.sin(npc.walkTime * 2)) * 0.02;
+            // Keep grounded
+            pos.y = 0;
         });
     }
 

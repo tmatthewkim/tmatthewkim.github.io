@@ -16,8 +16,8 @@
 
     // ===================== THREE.JS SETUP =====================
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1a1814);
-    scene.fog = new THREE.Fog(0x1a1814, 20, 50);
+    scene.background = new THREE.Color(0x12100d);
+    scene.fog = new THREE.Fog(0x12100d, 15, 42);
 
     const camera = new THREE.PerspectiveCamera(
         70,
@@ -28,11 +28,11 @@
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.4;
+    renderer.toneMappingExposure = 1.6;
     document.body.appendChild(renderer.domElement);
 
     // ===================== RESIZE HANDLER =====================
@@ -45,19 +45,22 @@
     // ===================== DUST PARTICLE SYSTEM =====================
     let dustParticles;
     function createDustParticles() {
-        const count = 200;
+        const count = 150;
         const positions = new Float32Array(count * 3);
+        const sizes = new Float32Array(count);
         const velocities = [];
-        const spread = 40;
+        const spread = 50;
 
         for (let i = 0; i < count; i++) {
             positions[i * 3] = (Math.random() - 0.5) * spread;
             positions[i * 3 + 1] = Math.random() * Museum.WALL_HEIGHT;
             positions[i * 3 + 2] = (Math.random() - 0.5) * spread;
+            sizes[i] = 0.02 + Math.random() * 0.04;
             velocities.push({
-                x: (Math.random() - 0.5) * 0.1,
-                y: (Math.random() - 0.5) * 0.05,
-                z: (Math.random() - 0.5) * 0.1
+                x: (Math.random() - 0.5) * 0.08,
+                y: (Math.random() - 0.5) * 0.03 + 0.01,
+                z: (Math.random() - 0.5) * 0.08,
+                sparkle: Math.random()
             });
         }
 
@@ -66,9 +69,9 @@
 
         const mat = new THREE.PointsMaterial({
             color: 0xffe8cc,
-            size: 0.03,
+            size: 0.04,
             transparent: true,
-            opacity: 0.4,
+            opacity: 0.35,
             sizeAttenuation: true
         });
 
@@ -77,16 +80,20 @@
         scene.add(dustParticles);
     }
 
+    let dustTime = 0;
     function updateDustParticles(delta) {
         if (!dustParticles) return;
+        dustTime += delta;
         const positions = dustParticles.geometry.attributes.position.array;
         const velocities = dustParticles.userData.velocities;
-        const spread = 40;
+        const spread = 50;
 
         for (let i = 0; i < velocities.length; i++) {
-            positions[i * 3] += velocities[i].x * delta;
+            // Gentle swirling motion
+            const swirl = Math.sin(dustTime * 0.3 + velocities[i].sparkle * 10) * 0.02;
+            positions[i * 3] += (velocities[i].x + swirl) * delta;
             positions[i * 3 + 1] += velocities[i].y * delta;
-            positions[i * 3 + 2] += velocities[i].z * delta;
+            positions[i * 3 + 2] += (velocities[i].z + Math.cos(dustTime * 0.2 + i) * 0.01) * delta;
 
             // Wrap around bounds
             if (Math.abs(positions[i * 3]) > spread / 2) positions[i * 3] *= -0.9;
@@ -94,12 +101,29 @@
             if (Math.abs(positions[i * 3 + 2]) > spread / 2) positions[i * 3 + 2] *= -0.9;
 
             // Gentle drift change
-            if (Math.random() < 0.01) {
-                velocities[i].x += (Math.random() - 0.5) * 0.02;
-                velocities[i].z += (Math.random() - 0.5) * 0.02;
+            if (Math.random() < 0.008) {
+                velocities[i].x += (Math.random() - 0.5) * 0.015;
+                velocities[i].z += (Math.random() - 0.5) * 0.015;
             }
         }
         dustParticles.geometry.attributes.position.needsUpdate = true;
+
+        // Animate dust opacity for subtle twinkling
+        dustParticles.material.opacity = 0.3 + Math.sin(dustTime * 0.5) * 0.08;
+    }
+
+    // ===================== ANIMATED LIGHTING =====================
+    let lightTime = 0;
+    function updateLighting(delta) {
+        lightTime += delta;
+        const lights = Museum.getAnimatedLights();
+        lights.forEach((light, i) => {
+            // Subtle flickering like torchlight
+            const flicker = Math.sin(lightTime * 2.5 + i * 1.7) * 0.05
+                + Math.sin(lightTime * 4.3 + i * 0.8) * 0.03
+                + Math.sin(lightTime * 7.1 + i * 3.2) * 0.02;
+            light.intensity = 1.2 + flicker;
+        });
     }
 
     // ===================== BUILD MUSEUM =====================
@@ -128,9 +152,6 @@
     updateLoading(65, 'Setting up info wing...');
 
     Exhibits.placeInfoExhibits(scene, museumResult.halls.info);
-    updateLoading(72, 'Setting up cover letter...');
-
-    Exhibits.placeCoverLetterExhibit(scene, museumResult.coverLetterDisplay);
     updateLoading(78, 'Creating atmosphere...');
 
     createDustParticles();
@@ -156,12 +177,20 @@
     document.getElementById('start-button').addEventListener('click', () => {
         document.getElementById('start-screen').style.display = 'none';
         document.getElementById('hud').style.display = 'block';
-        Player.lockPointer();
+
+        // Show cover letter automatically on first entry
+        setTimeout(() => {
+            Interactions.openOverlay({
+                title: MUSEUM_DATA.coverLetter.title,
+                content: MUSEUM_DATA.coverLetter.buildContent(),
+                type: 'coverLetter'
+            });
+        }, 800);
     });
 
     // Re-lock pointer when clicking canvas (after ESC)
     renderer.domElement.addEventListener('click', () => {
-        if (!Player.isPointerLocked() && !Interactions.isOverlayOpen()) {
+        if (!Player.isPointerLocked() && !Interactions.isOverlayOpen() && !Interactions.isBrochureOpen()) {
             Player.lockPointer();
         }
     });
@@ -178,6 +207,7 @@
         Interactions.update();
         NPCSystem.update(delta, Museum.getCollisionWalls());
         updateDustParticles(delta);
+        updateLighting(delta);
 
         renderer.render(scene, camera);
     }
@@ -191,7 +221,7 @@
         fallback.style.display = 'block';
 
         let html = `
-            <h1>Museum of Science Communication</h1>
+            <h1>Matthew Kim's Museum of Science Communication</h1>
             <p class="mobile-subtitle">NSC ePortfolio — Mobile View</p>
             <p style="text-align:center; color:#a89b8c; margin-bottom:2rem; font-size:0.9rem;">
                 For the full 3D museum experience, please visit on a desktop computer.
@@ -201,7 +231,7 @@
         // Cover letter
         html += `<div class="mobile-section">
             <h2>${MUSEUM_DATA.coverLetter.title}</h2>
-            ${MUSEUM_DATA.coverLetter.content}
+            ${MUSEUM_DATA.coverLetter.buildContent()}
         </div>`;
 
         // About Me

@@ -4,8 +4,8 @@
  */
 
 const Exhibits = (() => {
-    const FRAME_WIDTH = 2.2;
-    const FRAME_HEIGHT = 1.7;
+    const DEFAULT_FRAME_WIDTH = 2.2;
+    const DEFAULT_FRAME_HEIGHT = 1.7;
     const FRAME_DEPTH = 0.08;
     const FRAME_BORDER = 0.12;
     const FRAME_Y = 2.2;
@@ -14,16 +14,125 @@ const Exhibits = (() => {
     const exhibitMap = new Map();
     const allExhibitMeshes = [];
 
-    function createFrameTexture(title, subtitle, index) {
-        const canvas = document.createElement('canvas');
-        canvas.width = 512;
-        canvas.height = 384;
-        const ctx = canvas.getContext('2d');
+    function computeFrameDimensions(imgWidth, imgHeight) {
+        var aspect = imgWidth / imgHeight;
+        // Scale so frame area is roughly the same as default
+        var area = DEFAULT_FRAME_WIDTH * DEFAULT_FRAME_HEIGHT;
+        var h = Math.sqrt(area / aspect);
+        var w = h * aspect;
+        // Clamp to reasonable bounds
+        var maxW = 3.0, maxH = 2.8, minW = 1.2, minH = 1.0;
+        if (w > maxW) { w = maxW; h = w / aspect; }
+        if (h > maxH) { h = maxH; w = h * aspect; }
+        if (w < minW) { w = minW; h = w / aspect; }
+        if (h < minH) { h = minH; w = h * aspect; }
+        return { w: w, h: h };
+    }
+
+    function buildFrameMeshes(group, frameW, frameH, canvasTexture) {
+        // Remove old children
+        while (group.children.length > 0) {
+            var child = group.children[0];
+            group.remove(child);
+            if (child.geometry) child.geometry.dispose();
+            if (child.material) {
+                if (child.material.map && child.material.map !== canvasTexture) child.material.map.dispose();
+                child.material.dispose();
+            }
+        }
+
+        var frameMat = new THREE.MeshStandardMaterial({
+            color: 0xc9a96e,
+            roughness: 0.3,
+            metalness: 0.6
+        });
+        var outerW = frameW + FRAME_BORDER * 2;
+        var outerH = frameH + FRAME_BORDER * 2;
+
+        var topBar = new THREE.Mesh(new THREE.BoxGeometry(outerW, FRAME_BORDER, FRAME_DEPTH), frameMat);
+        topBar.position.y = frameH / 2 + FRAME_BORDER / 2;
+
+        var bottomBar = new THREE.Mesh(new THREE.BoxGeometry(outerW, FRAME_BORDER, FRAME_DEPTH), frameMat);
+        bottomBar.position.y = -frameH / 2 - FRAME_BORDER / 2;
+
+        var leftBar = new THREE.Mesh(new THREE.BoxGeometry(FRAME_BORDER, outerH, FRAME_DEPTH), frameMat);
+        leftBar.position.x = -frameW / 2 - FRAME_BORDER / 2;
+
+        var rightBar = new THREE.Mesh(new THREE.BoxGeometry(FRAME_BORDER, outerH, FRAME_DEPTH), frameMat);
+        rightBar.position.x = frameW / 2 + FRAME_BORDER / 2;
+
+        var pictureMat = new THREE.MeshBasicMaterial({ map: canvasTexture });
+        var picture = new THREE.Mesh(new THREE.PlaneGeometry(frameW, frameH), pictureMat);
+        picture.position.z = FRAME_DEPTH / 2 + 0.001;
+
+        group.add(topBar, bottomBar, leftBar, rightBar, picture);
+
+        return { picture: picture, bars: [topBar, bottomBar, leftBar, rightBar] };
+    }
+
+    function createFrameTexture(title, subtitle, index, thumbnailKey, onImageLoaded) {
+        var canvasW = 512;
+        var canvasH = 384;
+        var canvas = document.createElement('canvas');
+        canvas.width = canvasW;
+        canvas.height = canvasH;
+        var ctx = canvas.getContext('2d');
 
         // Background
         ctx.fillStyle = '#0e0e1a';
-        ctx.fillRect(0, 0, 512, 384);
+        ctx.fillRect(0, 0, canvasW, canvasH);
 
+        var tex = new THREE.CanvasTexture(canvas);
+
+        // If thumbnail available, draw image with title overlay
+        var thumbData = (typeof EXHIBIT_THUMBNAILS !== 'undefined') ? EXHIBIT_THUMBNAILS[thumbnailKey] : null;
+        if (thumbData) {
+            var img = new Image();
+            img.onload = function() {
+                // Resize canvas to match image aspect ratio
+                var aspect = img.naturalWidth / img.naturalHeight;
+                if (aspect >= 1) {
+                    canvasW = 512;
+                    canvasH = Math.round(512 / aspect);
+                } else {
+                    canvasH = 512;
+                    canvasW = Math.round(512 * aspect);
+                }
+                canvas.width = canvasW;
+                canvas.height = canvasH;
+                // Redraw background
+                ctx.fillStyle = '#0e0e1a';
+                ctx.fillRect(0, 0, canvasW, canvasH);
+                // Draw image filling the canvas
+                ctx.drawImage(img, 0, 0, canvasW, canvasH);
+                // Dark gradient at bottom for title
+                var gradStart = Math.round(canvasH * 0.65);
+                var grad = ctx.createLinearGradient(0, gradStart, 0, canvasH);
+                grad.addColorStop(0, 'rgba(0,0,0,0)');
+                grad.addColorStop(1, 'rgba(0,0,0,0.85)');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, gradStart, canvasW, canvasH - gradStart);
+                // Title text
+                ctx.fillStyle = '#e8d5b7';
+                ctx.font = 'bold 22px Georgia, serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(title, canvasW / 2, canvasH - 29);
+                // Click hint
+                ctx.fillStyle = '#a89b8c';
+                ctx.font = '13px Helvetica, sans-serif';
+                ctx.fillText('Click to view', canvasW / 2, canvasH - 9);
+                tex.needsUpdate = true;
+
+                // Notify caller of image dimensions so frame can resize
+                if (onImageLoaded) {
+                    onImageLoaded(img.naturalWidth, img.naturalHeight, tex);
+                }
+            };
+            img.src = thumbData;
+            return tex;
+        }
+
+        // Default: text-only frame
         // Inner border
         ctx.strokeStyle = '#c9a96e';
         ctx.lineWidth = 2;
@@ -33,31 +142,31 @@ const Exhibits = (() => {
         ctx.fillStyle = '#c9a96e';
         ctx.font = 'bold 28px Georgia, serif';
         ctx.textAlign = 'center';
-        ctx.fillText(`${index + 1}`, 256, 80);
+        ctx.fillText('' + (index + 1), 256, 80);
 
         // Title
         ctx.fillStyle = '#e8d5b7';
         ctx.font = '22px Georgia, serif';
 
         // Word wrap title
-        const words = title.split(' ');
-        let line = '';
-        let y = 160;
-        const maxWidth = 420;
-        const lineHeight = 30;
+        var words = title.split(' ');
+        var line = '';
+        var yPos = 160;
+        var maxWidth = 420;
+        var lineHeight = 30;
 
-        for (const word of words) {
-            const testLine = line + word + ' ';
-            const metrics = ctx.measureText(testLine);
+        for (var wi = 0; wi < words.length; wi++) {
+            var testLine = line + words[wi] + ' ';
+            var metrics = ctx.measureText(testLine);
             if (metrics.width > maxWidth && line !== '') {
-                ctx.fillText(line.trim(), 256, y);
-                line = word + ' ';
-                y += lineHeight;
+                ctx.fillText(line.trim(), 256, yPos);
+                line = words[wi] + ' ';
+                yPos += lineHeight;
             } else {
                 line = testLine;
             }
         }
-        ctx.fillText(line.trim(), 256, y);
+        ctx.fillText(line.trim(), 256, yPos);
 
         // Subtitle
         if (subtitle) {
@@ -71,75 +180,55 @@ const Exhibits = (() => {
         ctx.font = '14px Helvetica, sans-serif';
         ctx.fillText('Click to view', 256, 360);
 
-        return new THREE.CanvasTexture(canvas);
+        return tex;
     }
 
-    function createExhibitFrame(scene, x, y, z, rotationY, title, data, index) {
-        const group = new THREE.Group();
-
-        // Frame border (gold)
-        const frameMat = new THREE.MeshStandardMaterial({
-            color: 0xc9a96e,
-            roughness: 0.3,
-            metalness: 0.6
-        });
-        const outerW = FRAME_WIDTH + FRAME_BORDER * 2;
-        const outerH = FRAME_HEIGHT + FRAME_BORDER * 2;
-
-        // Frame pieces (top, bottom, left, right)
-        const topBar = new THREE.Mesh(
-            new THREE.BoxGeometry(outerW, FRAME_BORDER, FRAME_DEPTH),
-            frameMat
-        );
-        topBar.position.y = FRAME_HEIGHT / 2 + FRAME_BORDER / 2;
-
-        const bottomBar = new THREE.Mesh(
-            new THREE.BoxGeometry(outerW, FRAME_BORDER, FRAME_DEPTH),
-            frameMat
-        );
-        bottomBar.position.y = -FRAME_HEIGHT / 2 - FRAME_BORDER / 2;
-
-        const leftBar = new THREE.Mesh(
-            new THREE.BoxGeometry(FRAME_BORDER, outerH, FRAME_DEPTH),
-            frameMat
-        );
-        leftBar.position.x = -FRAME_WIDTH / 2 - FRAME_BORDER / 2;
-
-        const rightBar = new THREE.Mesh(
-            new THREE.BoxGeometry(FRAME_BORDER, outerH, FRAME_DEPTH),
-            frameMat
-        );
-        rightBar.position.x = FRAME_WIDTH / 2 + FRAME_BORDER / 2;
-
-        // Canvas/picture area
-        const canvasTexture = createFrameTexture(title, 'Artifact', index);
-        const pictureMat = new THREE.MeshBasicMaterial({ map: canvasTexture });
-        const picture = new THREE.Mesh(
-            new THREE.PlaneGeometry(FRAME_WIDTH, FRAME_HEIGHT),
-            pictureMat
-        );
-        picture.position.z = FRAME_DEPTH / 2 + 0.001;
-
-        group.add(topBar, bottomBar, leftBar, rightBar, picture);
+    function createExhibitFrame(scene, x, y, z, rotationY, title, data, index, thumbnailKey) {
+        var group = new THREE.Group();
         group.position.set(x, y, z);
         group.rotation.y = rotationY;
-
         scene.add(group);
+
+        var frameW = DEFAULT_FRAME_WIDTH;
+        var frameH = DEFAULT_FRAME_HEIGHT;
+
+        var canvasTexture = createFrameTexture(title, 'Artifact', index, thumbnailKey, function(imgW, imgH, tex) {
+            // Image loaded — rebuild frame with correct aspect ratio
+            var dims = computeFrameDimensions(imgW, imgH);
+            var result = buildFrameMeshes(group, dims.w, dims.h, tex);
+            // Update the clickable picture userData and tracking
+            result.picture.userData = {
+                type: 'exhibit',
+                data: data,
+                groupMeshes: result.bars
+            };
+            // Replace old picture in tracking arrays
+            var oldIdx = allExhibitMeshes.indexOf(picture);
+            if (oldIdx !== -1) {
+                exhibitMap.delete(allExhibitMeshes[oldIdx].uuid);
+                allExhibitMeshes[oldIdx] = result.picture;
+            }
+            exhibitMap.set(result.picture.uuid, data);
+            group.updateMatrixWorld(true);
+        });
+
+        // Build initial frame with default dimensions
+        var meshes = buildFrameMeshes(group, frameW, frameH, canvasTexture);
+        var picture = meshes.picture;
 
         // Make the picture clickable
         picture.userData = {
             type: 'exhibit',
             data: data,
-            groupMeshes: [topBar, bottomBar, leftBar, rightBar]
+            groupMeshes: meshes.bars
         };
 
-        // Need to update world matrix for raycasting
         group.updateMatrixWorld(true);
 
         exhibitMap.set(picture.uuid, data);
         allExhibitMeshes.push(picture);
 
-        return { group, picture };
+        return { group: group, picture: picture };
     }
 
     function placeExhibitsInHall(scene, hall, exhibitKey) {
@@ -167,13 +256,13 @@ const Exhibits = (() => {
                         ...artifact,
                         exhibitKey,
                         wingName: data.name
-                    }, i);
+                    }, i, artifact.thumbnail);
                 } else {
                     createExhibitFrame(scene, xPos, FRAME_Y, wallZ_bottom, Math.PI, artifact.title, {
                         ...artifact,
                         exhibitKey,
                         wingName: data.name
-                    }, i);
+                    }, i, artifact.thumbnail);
                 }
             });
         } else {
@@ -190,13 +279,13 @@ const Exhibits = (() => {
                         ...artifact,
                         exhibitKey,
                         wingName: data.name
-                    }, i);
+                    }, i, artifact.thumbnail);
                 } else {
                     createExhibitFrame(scene, wallX_right, FRAME_Y, zPos, -Math.PI / 2, artifact.title, {
                         ...artifact,
                         exhibitKey,
                         wingName: data.name
-                    }, i);
+                    }, i, artifact.thumbnail);
                 }
             });
         }
@@ -258,7 +347,7 @@ const Exhibits = (() => {
             type: 'info'
         };
         createExhibitFrame(scene, cx - hw + 0.2, FRAME_Y, cz, Math.PI / 2,
-            'About Me', aboutMeData, 0);
+            'About Me', aboutMeData, 0, 'info-aboutme');
 
         // About This ePortfolio on right wall
         const aboutPortData = {
@@ -268,7 +357,7 @@ const Exhibits = (() => {
             type: 'info'
         };
         createExhibitFrame(scene, cx + hw - 0.2, FRAME_Y, cz, -Math.PI / 2,
-            'About This ePortfolio', aboutPortData, 1);
+            'About This ePortfolio', aboutPortData, 1, 'info-portfolio');
 
         // Wing sign
         addWingSign(scene, infoHall, 'Info Wing', 'About Me & This ePortfolio');
@@ -292,6 +381,12 @@ const Exhibits = (() => {
         allExhibitMeshes.push(coverLetterDisplay);
     }
 
+    function registerExhibitMesh(mesh, data) {
+        mesh.userData = { type: 'exhibit', data: data };
+        exhibitMap.set(mesh.uuid, data);
+        allExhibitMeshes.push(mesh);
+    }
+
     function getAllExhibitMeshes() {
         return allExhibitMeshes;
     }
@@ -304,6 +399,7 @@ const Exhibits = (() => {
         placeExhibitsInHall,
         placeInfoExhibits,
         placeCoverLetterExhibit,
+        registerExhibitMesh,
         getAllExhibitMeshes,
         getExhibitData
     };

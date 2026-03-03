@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NSC ePortfolio — Museum of Science Communication</title>
+    <title>Matthew Kim's Museum of Science Communication</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <!-- Loading Screen -->
     <div id="loading-screen">
         <div class="loading-content">
+            <p class="museum-name-sub">Matthew Kim's</p>
             <h1>Museum of Science Communication</h1>
-            <p>NSC ePortfolio</p>
+            <p>A Notation in Science Communication (NSC) ePortfolio</p>
             <div class="loading-bar">
                 <div class="loading-fill" id="loading-fill"></div>
             </div>
@@ -22,18 +24,23 @@
     <!-- Start Screen (after loading) -->
     <div id="start-screen" style="display:none;">
         <div class="start-content">
+            <p class="museum-name-sub">Matthew Kim's</p>
             <h1>Museum of Science Communication</h1>
-            <h2>An NSC ePortfolio</h2>
+            <h2>A Notation in Science Communication (NSC) ePortfolio</h2>
             <p class="start-instructions">
                 <strong>Controls:</strong><br>
                 <span class="key">W A S D</span> or <span class="key">Arrow Keys</span> — Move<br>
                 <span class="key">Mouse</span> — Look around<br>
                 <span class="key">Click</span> — View exhibits<br>
+                <span class="key">M</span> — Museum map &amp; guide<br>
                 <span class="key">ESC</span> — Close / Release mouse
             </p>
             <button id="start-button">Enter Museum</button>
         </div>
     </div>
+
+    <!-- Vignette overlay for cinematic feel -->
+    <div id="vignette"></div>
 
     <!-- HUD -->
     <div id="hud" style="display:none;">
@@ -41,6 +48,77 @@
         <div id="crosshair">+</div>
         <div id="interact-prompt" style="display:none;">Click to view</div>
         <canvas id="minimap" width="180" height="180"></canvas>
+        <button id="brochure-btn">MAP</button>
+        <div id="brochure-hint">Press M for museum map</div>
+    </div>
+
+    <!-- Brochure / Museum Map Overlay -->
+    <div id="brochure-overlay" style="display:none;">
+        <div class="brochure-content">
+            <button id="brochure-close">&times;</button>
+            <h1 class="brochure-title">Matthew Kim's Museum of Science Communication</h1>
+            <p class="brochure-subtitle">Visitor Guide &amp; Map</p>
+
+            <div class="brochure-map">
+                <!-- Cross-shaped floor plan -->
+                <div class="map-wing map-north" data-teleport="neanderthalWing">
+                    <span class="map-wing-label">Neanderthal<br><em>Build</em></span>
+                </div>
+                <div class="map-wing map-west" data-teleport="trilobiteWing">
+                    <span class="map-wing-label">Trilobite<br><em>Reveal</em></span>
+                </div>
+                <div class="map-center" data-teleport="grandHall">
+                    <span class="map-wing-label">Grand Hall</span>
+                </div>
+                <div class="map-wing map-east" data-teleport="archaeopteryxWing">
+                    <span class="map-wing-label">Archaeopteryx<br><em>Bridge</em></span>
+                </div>
+                <div class="map-wing map-south" data-teleport="infoWing">
+                    <span class="map-wing-label">Info Wing<br><em>About</em></span>
+                </div>
+            </div>
+
+            <div class="brochure-sections">
+                <!-- Welcome -->
+                <div class="brochure-section">
+                    <h3>Welcome</h3>
+                    <a href="#" data-teleport="coverLetter" class="brochure-link">Read Welcome Letter</a>
+                </div>
+
+                <!-- Trilobite Wing -->
+                <div class="brochure-section">
+                    <h3>Trilobite Wing — Reveal</h3>
+                    <a href="#" data-teleport="trilobite_0" class="brochure-link">Paleostoric YouTube Video</a>
+                    <a href="#" data-teleport="trilobite_1" class="brochure-link">PaleoPals Storytelling Podcast</a>
+                    <a href="#" data-teleport="trilobite_2" class="brochure-link">Artifact 3</a>
+                </div>
+
+                <!-- Archaeopteryx Wing -->
+                <div class="brochure-section">
+                    <h3>Archaeopteryx Wing — Bridge</h3>
+                    <a href="#" data-teleport="archaeopteryx_0" class="brochure-link">Project Biosecurity</a>
+                    <a href="#" data-teleport="archaeopteryx_1" class="brochure-link">Artifact 2</a>
+                    <a href="#" data-teleport="archaeopteryx_2" class="brochure-link">Artifact 3</a>
+                </div>
+
+                <!-- Neanderthal Wing -->
+                <div class="brochure-section">
+                    <h3>Neanderthal Wing — Build</h3>
+                    <a href="#" data-teleport="neanderthal_0" class="brochure-link">PWR 91NSC Literature Review</a>
+                    <a href="#" data-teleport="neanderthal_1" class="brochure-link">Artifact 2</a>
+                    <a href="#" data-teleport="neanderthal_2" class="brochure-link">Artifact 3</a>
+                </div>
+
+                <!-- Info Wing -->
+                <div class="brochure-section">
+                    <h3>Info Wing</h3>
+                    <a href="#" data-teleport="aboutMe" class="brochure-link">About Me</a>
+                    <a href="#" data-teleport="aboutPortfolio" class="brochure-link">About This ePortfolio</a>
+                </div>
+            </div>
+
+            <p class="brochure-footer">Press <span class="key">M</span> or click MAP to toggle this guide</p>
+        </div>
     </div>
 
     <!-- Exhibit Overlay -->
@@ -59,6 +137,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <!-- App Scripts -->
+    <script src="js/wing-images.js"></script>
     <script src="js/data.js"></script>
     <script src="js/museum.js"></script>
     <script src="js/player.js"></script>

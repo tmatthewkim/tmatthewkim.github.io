@@ -1,6 +1,6 @@
 /**
  * INTERACTIONS
- * Raycasting for exhibit detection, overlay management, minimap drawing.
+ * Raycasting for exhibit detection, overlay management, minimap drawing, brochure system.
  */
 
 const Interactions = (() => {
@@ -9,6 +9,7 @@ const Interactions = (() => {
 
     let hoveredExhibit = null;
     let overlayOpen = false;
+    let brochureOpen = false;
     let camera;
 
     const promptEl = document.getElementById('interact-prompt');
@@ -29,19 +30,27 @@ const Interactions = (() => {
         // Close overlay on button click
         overlayClose.addEventListener('click', closeOverlay);
 
-        // Close overlay on ESC
+        // Close overlay on ESC; toggle brochure on M
         document.addEventListener('keydown', (e) => {
-            if (e.code === 'Escape' && overlayOpen) {
-                closeOverlay();
+            if (e.code === 'Escape') {
+                if (overlayOpen) closeOverlay();
+                else if (brochureOpen) closeBrochure();
+            }
+            if (e.code === 'KeyM' && !overlayOpen) {
+                if (brochureOpen) closeBrochure();
+                else openBrochure();
             }
         });
 
         // Click to interact
         document.addEventListener('click', onClick);
+
+        // Setup brochure
+        initBrochure();
     }
 
     function onClick() {
-        if (overlayOpen) return;
+        if (overlayOpen || brochureOpen) return;
         if (!Player.isPointerLocked()) return;
 
         if (hoveredExhibit) {
@@ -53,7 +62,15 @@ const Interactions = (() => {
         overlayOpen = true;
         document.exitPointerLock();
 
-        overlayTitle.textContent = data.title;
+        const contentEl = overlayEl.querySelector('.overlay-content');
+        if (data.type === 'coverLetter') {
+            contentEl.classList.add('overlay-wide');
+            overlayTitle.style.display = 'none';
+        } else {
+            contentEl.classList.remove('overlay-wide');
+            overlayTitle.style.display = '';
+            overlayTitle.textContent = data.title;
+        }
 
         let bodyHTML = '';
 
@@ -93,8 +110,120 @@ const Interactions = (() => {
         }, 100);
     }
 
+    // ===================== BROCHURE SYSTEM =====================
+
+    // Teleport positions for wings and artifacts
+    // Hall geometry: GRAND_HALL = 24x24, center at origin; wings HALL_WIDTH=12, HALL_DEPTH=22
+    // Trilobite hall: cx=-23, cz=0, axis='x'; Archaeopteryx: cx=23, cz=0, axis='x'
+    // Neanderthal: cx=0, cz=-23, axis='z'; Info: cx=0, cz=23, axis='z'
+    // For axis='x': artifacts spaced along X, alternating top wall (z≈-5.8) and bottom (z≈5.8)
+    // For axis='z': artifacts spaced along Z, alternating left wall (x≈-5.8) and right (x≈5.8)
+    // spacing = HALL_DEPTH / (numArtifacts+1) = 22/4 = 5.5; base = cx-hd or cz-hd where hd=11
+    const SP = 5.5; // artifact spacing
+
+    const teleportTargets = {
+        grandHall: { x: 0, z: 5, yaw: Math.PI },
+        coverLetter: 'overlay',
+        trilobiteWing: { x: -15, z: 0, yaw: Math.PI / 2 },
+        archaeopteryxWing: { x: 15, z: 0, yaw: -Math.PI / 2 },
+        neanderthalWing: { x: 0, z: -15, yaw: 0 },
+        infoWing: { x: 0, z: 15, yaw: Math.PI },
+        // Trilobite (cx=-23, axis='x'): xPos = -34 + SP*(i+1), even→top wall z=-4, odd→bottom wall z=4
+        trilobite_0: { x: -34 + SP * 1, z: -4, yaw: 0 },          // x=-28.5
+        trilobite_1: { x: -34 + SP * 2, z: 4, yaw: Math.PI },      // x=-23
+        trilobite_2: { x: -34 + SP * 3, z: -4, yaw: 0 },           // x=-17.5
+        // Archaeopteryx (cx=23, axis='x'): xPos = 12 + SP*(i+1)
+        archaeopteryx_0: { x: 12 + SP * 1, z: -4, yaw: 0 },        // x=17.5
+        archaeopteryx_1: { x: 12 + SP * 2, z: 4, yaw: Math.PI },    // x=23
+        archaeopteryx_2: { x: 12 + SP * 3, z: -4, yaw: 0 },         // x=28.5
+        // Neanderthal (cz=-23, axis='z'): zPos = -34 + SP*(i+1), even→left wall x=-4, odd→right wall x=4
+        neanderthal_0: { x: -4, z: -34 + SP * 1, yaw: Math.PI / 2 },   // z=-28.5
+        neanderthal_1: { x: 4, z: -34 + SP * 2, yaw: -Math.PI / 2 },   // z=-23
+        neanderthal_2: { x: -4, z: -34 + SP * 3, yaw: Math.PI / 2 },   // z=-17.5
+        // Info wing (cz=23, axis='z')
+        aboutMe: { x: -4, z: 23, yaw: Math.PI / 2 },
+        aboutPortfolio: { x: 4, z: 23, yaw: -Math.PI / 2 },
+    };
+
+    function initBrochure() {
+        const brochureBtn = document.getElementById('brochure-btn');
+        const brochureOverlay = document.getElementById('brochure-overlay');
+        const brochureClose = document.getElementById('brochure-close');
+
+        if (brochureBtn) {
+            brochureBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (brochureOpen) closeBrochure();
+                else openBrochure();
+            });
+        }
+
+        if (brochureClose) {
+            brochureClose.addEventListener('click', closeBrochure);
+        }
+
+        // Wire up all teleport links in the brochure
+        if (brochureOverlay) {
+            brochureOverlay.querySelectorAll('[data-teleport]').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const target = el.getAttribute('data-teleport');
+                    handleTeleport(target);
+                });
+            });
+        }
+    }
+
+    function openBrochure() {
+        brochureOpen = true;
+        document.exitPointerLock();
+        const el = document.getElementById('brochure-overlay');
+        if (el) {
+            el.style.display = 'flex';
+            el.classList.add('fade-in');
+        }
+    }
+
+    function closeBrochure() {
+        brochureOpen = false;
+        const el = document.getElementById('brochure-overlay');
+        if (el) {
+            el.style.display = 'none';
+            el.classList.remove('fade-in');
+        }
+        setTimeout(() => {
+            Player.lockPointer();
+        }, 100);
+    }
+
+    function handleTeleport(targetKey) {
+        const target = teleportTargets[targetKey];
+        if (!target) return;
+
+        if (target === 'overlay') {
+            // Open cover letter
+            closeBrochure();
+            setTimeout(() => {
+                openOverlay({
+                    title: MUSEUM_DATA.coverLetter.title,
+                    content: MUSEUM_DATA.coverLetter.buildContent(),
+                    type: 'coverLetter'
+                });
+            }, 150);
+            return;
+        }
+
+        closeBrochure();
+        Player.teleportTo(target.x, target.z, target.yaw);
+        setTimeout(() => {
+            Player.lockPointer();
+        }, 150);
+    }
+
+    // ===================== RAYCASTING & UPDATE =====================
+
     function update() {
-        if (overlayOpen || !Player.isPointerLocked()) return;
+        if (overlayOpen || brochureOpen || !Player.isPointerLocked()) return;
 
         // Cast ray from camera center
         raycaster.set(camera.position, Player.getDirection());
@@ -205,9 +334,18 @@ const Interactions = (() => {
         return overlayOpen;
     }
 
+    function isBrochureOpen() {
+        return brochureOpen;
+    }
+
     return {
         init,
         update,
-        isOverlayOpen
+        isOverlayOpen,
+        isBrochureOpen,
+        openOverlay,
+        closeOverlay,
+        openBrochure,
+        closeBrochure
     };
 })();

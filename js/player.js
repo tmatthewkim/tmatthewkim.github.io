@@ -160,6 +160,13 @@ const Player = (() => {
         return isLocked;
     }
 
+    function teleportTo(x, z, facingYaw) {
+        if (!camera) return;
+        camera.position.set(x, PLAYER_HEIGHT, z);
+        euler.set(0, facingYaw, 0, 'YXZ');
+        camera.quaternion.setFromEuler(euler);
+    }
+
     return {
         init,
         update,
@@ -167,6 +174,7 @@ const Player = (() => {
         setupPointerLock,
         getPosition,
         getDirection,
-        isPointerLocked
+        isPointerLocked,
+        teleportTo
     };
 })();
