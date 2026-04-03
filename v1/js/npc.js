@@ -15,8 +15,8 @@ const NPCSystem = (() => {
 
     // Diverse outfits with varied skin tones, hair, and body types
     const OUTFITS = [
-        // Woman, dark skin, puffs hairstyle
-        { body: 0x8b3a3a, pants: 0x2a2a35, skin: 0x6b3e26, hair: 0x1a1008, hairStyle: 'puffs', gender: 'f', height: 0.95 },
+        // Woman, dark skin, natural hair
+        { body: 0x8b3a3a, pants: 0x2a2a35, skin: 0x6b3e26, hair: 0x1a1008, hairStyle: 'afro', gender: 'f', height: 0.95 },
         // Man, light skin, brown hair
         { body: 0x3a4a5c, pants: 0x333340, skin: 0xe0b894, hair: 0x5c3a1e, hairStyle: 'short', gender: 'm', height: 1.02 },
         // Woman, East Asian, black hair, long
@@ -32,109 +32,98 @@ const NPCSystem = (() => {
     // Waypoint paths through the museum
     // DOORS at: West x=-12 z=0, East x=12 z=0, North x=0 z=-12, South x=0 z=12
     // Door width 4.5 — NPCs must pass through center (z≈0 or x≈0) at doors
-    // OBSTACLES: Columns at (±9, {-8,-3,3,8}), Benches at (±9, ±6)
-    // Safe Grand Hall corridors: |x| ≤ 7 avoids columns/benches; |x| > 3 avoids skeleton
+    // Benches at: (-18,0), (18,0), (0,-18), (0,18)
+    // Fossils at wing centers: (-23,0), (23,0), (0,-23)
     const PATHS = [
         // NPC 1: Grand Hall -> Trilobite -> Grand Hall -> Archaeopteryx
         [
-            { x: 7, z: 7 },
-            { x: -7, z: 7 },
-            { x: -7, z: 2 },
+            { x: 4, z: 2 },
+            { x: -6, z: 1 },
             { x: -12, z: 0 },          // through west door
             { x: -16, z: -4, pause: true },
             { x: -26, z: -4, pause: true },
             { x: -26, z: 4, pause: true },
             { x: -16, z: 4 },
             { x: -12, z: 0 },          // back through west door
-            { x: -7, z: -2 },
-            { x: -7, z: -7 },
-            { x: 7, z: -7 },
-            { x: 7, z: -2 },
+            { x: -4, z: -1 },
+            { x: 6, z: -1 },
             { x: 12, z: 0 },           // through east door
             { x: 16, z: -4, pause: true },
             { x: 26, z: 4, pause: true },
             { x: 16, z: 4 },
             { x: 12, z: 0 },           // back through east door
-            { x: 7, z: 2 },
+            { x: 4, z: 2 },
         ],
         // NPC 2: Grand Hall -> Neanderthal -> Grand Hall
         [
-            { x: -7, z: -7 },
-            { x: -4, z: -7 },
+            { x: -3, z: -4 },
+            { x: -1, z: -8 },
             { x: 0, z: -12 },          // through north door
             { x: -4, z: -16, pause: true },
             { x: -4, z: -26, pause: true },
             { x: 4, z: -26, pause: true },
             { x: 4, z: -16 },
             { x: 0, z: -12 },          // back through north door
-            { x: 4, z: -7 },
-            { x: 7, z: -7 },
-            { x: 7, z: 7, pause: true },
-            { x: -7, z: 7 },
+            { x: 2, z: -6 },
+            { x: 3, z: 3 },
+            { x: -3, z: -4 },
         ],
         // NPC 3: Archaeopteryx + Neanderthal
         [
-            { x: 7, z: -7 },
-            { x: 7, z: -2 },
+            { x: 5, z: -1 },
             { x: 12, z: 0 },           // through east door
             { x: 20, z: -4, pause: true },
             { x: 26, z: -4, pause: true },
             { x: 26, z: 4, pause: true },
             { x: 20, z: 4 },
             { x: 12, z: 0 },           // back through east door
-            { x: 7, z: -2 },
-            { x: 7, z: -7 },
-            { x: 4, z: -7 },
+            { x: 2, z: -4 },
             { x: 0, z: -12 },          // through north door
             { x: 4, z: -20, pause: true },
             { x: -4, z: -26, pause: true },
             { x: -4, z: -16 },
             { x: 0, z: -12 },          // back through north door
-            { x: -4, z: -7 },
-            { x: -7, z: -7 },
-            { x: -7, z: 7 },
-            { x: 7, z: 7 },
+            { x: -2, z: -4 },
+            { x: -5, z: 2 },
         ],
         // NPC 4: Grand Hall + Info Wing
         [
-            { x: 7, z: 7 },
-            { x: 4, z: 7 },
+            { x: 3, z: 3 },
+            { x: -3, z: 3 },
+            { x: 1, z: 8 },
             { x: 0, z: 12 },           // through south door
             { x: 4, z: 20, pause: true },
             { x: 4, z: 26, pause: true },
             { x: -4, z: 26, pause: true },
             { x: -4, z: 20 },
             { x: 0, z: 12 },           // back through south door
-            { x: -4, z: 7 },
-            { x: -7, z: 7 },
-            { x: -7, z: -7, pause: true },
-            { x: 7, z: -7 },
+            { x: -1, z: 6 },
+            { x: 3, z: 3 },
         ],
         // NPC 5: Trilobite + Info
         [
-            { x: -7, z: 7 },
-            { x: -7, z: 2 },
+            { x: -5, z: 2 },
+            { x: -8, z: 0 },
             { x: -12, z: 0 },          // through west door
             { x: -20, z: -4, pause: true },
             { x: -26, z: -4, pause: true },
             { x: -20, z: 4 },
             { x: -12, z: 0 },          // back through west door
-            { x: -7, z: 2 },
-            { x: -7, z: 7 },
-            { x: -4, z: 7 },
+            { x: -4, z: 4 },
+            { x: -1, z: 8 },
             { x: 0, z: 12 },           // through south door
             { x: -4, z: 20, pause: true },
             { x: 0, z: 12 },           // back through south door
-            { x: -4, z: 7 },
-            { x: -7, z: 7 },
+            { x: -2, z: 6 },
+            { x: -5, z: 2 },
         ],
-        // NPC 6: Grand Hall wanderer — circle inside column line
+        // NPC 6: Grand Hall wanderer (stays in center area)
         [
-            { x: 7, z: -7 },
-            { x: -7, z: -7 },
-            { x: -7, z: 7, pause: true },
-            { x: 7, z: 7 },
-            { x: 7, z: -7 },
+            { x: 5, z: -3 },
+            { x: -5, z: -3 },
+            { x: -5, z: 3, pause: true },
+            { x: 5, z: 3 },
+            { x: 5, z: -3 },
         ],
     ];
 
@@ -159,20 +148,7 @@ const NPCSystem = (() => {
         group.add(head);
 
         // Hair based on style
-        if (outfit.hairStyle === 'bald') {
-            // No hair
-        } else if (outfit.hairStyle === 'puffs') {
-            // Two puffs / pigtail buns on sides of head
-            const cap = new THREE.Mesh(new THREE.SphereGeometry(0.132, 10, 10, 0, Math.PI * 2, 0, Math.PI * 0.4), hairMat);
-            cap.position.y = 1.52 * sc;
-            group.add(cap);
-            const leftPuff = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), hairMat);
-            leftPuff.position.set(-0.15, 1.56 * sc, 0);
-            group.add(leftPuff);
-            const rightPuff = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), hairMat);
-            rightPuff.position.set(0.15, 1.56 * sc, 0);
-            group.add(rightPuff);
-        } else if (outfit.hairStyle === 'afro') {
+        if (outfit.hairStyle === 'afro') {
             const afro = new THREE.Mesh(new THREE.SphereGeometry(0.18, 10, 10), hairMat);
             afro.position.y = 1.56 * sc;
             afro.scale.set(1, 0.85, 1);
@@ -187,8 +163,8 @@ const NPCSystem = (() => {
             back.position.set(0, 1.37 * sc, -0.10);
             group.add(back);
         } else if (outfit.hairStyle === 'bun') {
-            // Top cap - only covers top of head
-            const top = new THREE.Mesh(new THREE.SphereGeometry(0.135, 10, 10, 0, Math.PI * 2, 0, Math.PI * 0.45), hairMat);
+            // Top cap - slightly larger than head, only top hemisphere
+            const top = new THREE.Mesh(new THREE.SphereGeometry(0.135, 10, 10, 0, Math.PI * 2, 0, Math.PI * 0.55), hairMat);
             top.position.y = 1.52 * sc;
             group.add(top);
             // Small bun on top-back of head
@@ -263,19 +239,6 @@ const NPCSystem = (() => {
         rightShoe.position.set(0.08, 0.4 * sc, 0.02);
         rightShoe.name = 'rightShoe';
         group.add(rightShoe);
-
-        // Reparent all body parts into a sub-group, then shift down + scale
-        // so feet touch the floor while preserving original head height
-        const body = new THREE.Group();
-        while (group.children.length > 0) {
-            body.add(group.children[0]);
-        }
-        const footBottom = 0.4 * sc - 0.03;
-        const headTop = 1.52 * sc + 0.13;
-        const S = headTop / (headTop - footBottom);
-        body.position.y = -S * footBottom;
-        body.scale.set(S, S, S);
-        group.add(body);
 
         return group;
     }
@@ -400,7 +363,7 @@ const NPCSystem = (() => {
             // Walking animation
             npc.walkTime += delta * 6;
 
-            npc.mesh.children[0].children.forEach(child => {
+            npc.mesh.children.forEach(child => {
                 if (child.name === 'leftLeg' || child.name === 'leftShoe') {
                     child.position.z = (child.name === 'leftShoe' ? 0.02 : 0) + Math.sin(npc.walkTime) * 0.08;
                 }

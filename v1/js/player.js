@@ -28,9 +28,8 @@ const Player = (() => {
 
     function init(cam) {
         camera = cam;
-        camera.position.set(-6, PLAYER_HEIGHT, 0);
+        camera.position.set(0, PLAYER_HEIGHT, 7);
         camera.rotation.order = 'YXZ';
-        camera.rotation.y = -Math.PI / 2; // face east (+X) toward skeleton & sign
 
         document.addEventListener('keydown', onKeyDown);
         document.addEventListener('keyup', onKeyUp);

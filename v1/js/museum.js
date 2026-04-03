@@ -281,31 +281,16 @@ const Museum = (() => {
         scene.add(m);
     }
 
-    function addTrim(scene, cx, cz, w, d, doorWalls) {
+    function addTrim(scene, cx, cz, w, d) {
         const hw = w / 2, hd = d / 2, off = 0.18;
-        const dw = doorWalls || {};
-
-        function addSplit(fn, posX, posZ, len, rot, hasDoor) {
-            if (!hasDoor) { fn(scene, posX, posZ, len, rot); return; }
-            const segLen = (len - DOOR_WIDTH) / 2 - 0.1;
-            if (segLen <= 0) return;
-            if (rot) {
-                fn(scene, posX, posZ - len / 2 + segLen / 2, segLen, rot);
-                fn(scene, posX, posZ + len / 2 - segLen / 2, segLen, rot);
-            } else {
-                fn(scene, posX - len / 2 + segLen / 2, posZ, segLen, rot);
-                fn(scene, posX + len / 2 - segLen / 2, posZ, segLen, rot);
-            }
-        }
-
-        addSplit(addBaseboard, cx, cz - hd + off, w, 0, dw.north);
-        addSplit(addBaseboard, cx, cz + hd - off, w, 0, dw.south);
-        addSplit(addBaseboard, cx - hw + off, cz, d, Math.PI / 2, dw.west);
-        addSplit(addBaseboard, cx + hw - off, cz, d, Math.PI / 2, dw.east);
-        addSplit(addCrownMolding, cx, cz - hd + off, w, 0, dw.north);
-        addSplit(addCrownMolding, cx, cz + hd - off, w, 0, dw.south);
-        addSplit(addCrownMolding, cx - hw + off, cz, d, Math.PI / 2, dw.west);
-        addSplit(addCrownMolding, cx + hw - off, cz, d, Math.PI / 2, dw.east);
+        addBaseboard(scene, cx, cz - hd + off, w, 0);
+        addBaseboard(scene, cx, cz + hd - off, w, 0);
+        addBaseboard(scene, cx - hw + off, cz, d, Math.PI / 2);
+        addBaseboard(scene, cx + hw - off, cz, d, Math.PI / 2);
+        addCrownMolding(scene, cx, cz - hd + off, w, 0);
+        addCrownMolding(scene, cx, cz + hd - off, w, 0);
+        addCrownMolding(scene, cx - hw + off, cz, d, Math.PI / 2);
+        addCrownMolding(scene, cx + hw - off, cz, d, Math.PI / 2);
     }
 
     function addDoorFrame(scene, x, z, rotated) {
@@ -655,9 +640,8 @@ const Museum = (() => {
 
         // ENTRANCE AREA (south section, z > 4)
 
-        // Carpet runners on either side of skeleton platform
-        addCarpetRunner(scene, 0, 8, 3, 7);   // south (entrance side)
-        addCarpetRunner(scene, 0, -8, 3, 7);  // north
+        // Carpet runner from south toward north
+        addCarpetRunner(scene, 0, 2, 3, 18);
 
         // Plants in corners
         addPottedPlant(scene, -hw + 2, hd - 2);
@@ -682,7 +666,7 @@ const Museum = (() => {
         addWallSconce(scene, 7, 5.5, hd - 0.35);
 
         // Trim
-        addTrim(scene, 0, 0, GRAND_HALL_WIDTH, GRAND_HALL_DEPTH, { north: true, south: true, west: true, east: true });
+        addTrim(scene, 0, 0, GRAND_HALL_WIDTH, GRAND_HALL_DEPTH);
 
         rooms.push({ name: 'Grand Hall', minX: -hw, maxX: hw, minZ: -hd, maxZ: hd });
     }
@@ -704,7 +688,7 @@ const Museum = (() => {
             addWall(scene, cx, hy, cz + hw, HALL_DEPTH, WALL_HEIGHT, WALL_THICKNESS, wallColor);
             const farX = offsetX < 0 ? cx - hd : cx + hd;
             addWall(scene, farX, hy, cz, WALL_THICKNESS, WALL_HEIGHT, HALL_WIDTH, wallColor);
-            addTrim(scene, cx, cz, HALL_DEPTH, HALL_WIDTH, offsetX < 0 ? { east: true } : { west: true });
+            addTrim(scene, cx, cz, HALL_DEPTH, HALL_WIDTH);
             addBench(scene, cx + (offsetX < 0 ? 5 : -5), cz, Math.PI / 2);
             if (offsetX < 0) addRopeBarrier(scene, farX + 2, cz - 2, farX + 2, cz + 2);
             else addRopeBarrier(scene, farX - 2, cz - 2, farX - 2, cz + 2);
@@ -722,7 +706,7 @@ const Museum = (() => {
             addWall(scene, cx + hw, hy, cz, WALL_THICKNESS, WALL_HEIGHT, HALL_DEPTH, wallColor);
             const farZ = offsetZ < 0 ? cz - hd : cz + hd;
             addWall(scene, cx, hy, farZ, HALL_WIDTH, WALL_HEIGHT, WALL_THICKNESS, wallColor);
-            addTrim(scene, cx, cz, HALL_WIDTH, HALL_DEPTH, offsetZ < 0 ? { south: true } : { north: true });
+            addTrim(scene, cx, cz, HALL_WIDTH, HALL_DEPTH);
             addBench(scene, cx, cz + (offsetZ < 0 ? 5 : -5), 0);
             if (offsetZ < 0) addRopeBarrier(scene, cx - 2, farZ + 2, cx + 2, farZ + 2);
             else addRopeBarrier(scene, cx - 2, farZ - 2, cx + 2, farZ - 2);
@@ -1374,88 +1358,6 @@ const Museum = (() => {
         scene.add(group);
     }
 
-    // ===================== SKELETON CENTERPIECE (GRAND HALL) =====================
-
-    function buildTRexSkeleton(scene) {
-        // Initial collision box — oversized to block NPCs before model loads; auto-fitted later
-        const collBox = new THREE.Mesh(new THREE.BoxGeometry(5, 5, 8));
-        collBox.position.set(0, 2, 0);
-        collBox.visible = false;
-        scene.add(collBox);
-        collisionWalls.push(collBox);
-
-        // Lighting for the centerpiece
-        const spotAbove = new THREE.PointLight(0xfff5dd, 0.9, 18);
-        spotAbove.position.set(0, WALL_HEIGHT - 0.5, 0);
-        scene.add(spotAbove);
-
-        // Load GLB model (includes its own stand)
-        const dracoLoader = new THREE.DRACOLoader();
-        dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/draco/');
-        const loader = new THREE.GLTFLoader();
-        loader.setDRACOLoader(dracoLoader);
-        const boneMaterial = new THREE.MeshLambertMaterial({
-            color: 0xd8ccb4
-        });
-
-        loader.load(
-            'assets/bambiraptor-skeleton.glb',
-            function (gltf) {
-                const model = gltf.scene;
-
-                // Apply bone material to all meshes (no shadows for performance)
-                model.traverse(function (child) {
-                    if (child.isMesh) {
-                        child.material = boneMaterial;
-                    }
-                });
-
-                // Wrap in a pivot so rotation doesn't fight with positioning
-                const pivot = new THREE.Group();
-                pivot.add(model);
-
-                // Fix orientation: Fusion 360 Z-up → Three.js Y-up
-                model.rotation.x = -Math.PI / 2;
-                // Rotate pivot so skull faces +Z (info wing) — skull was at +X
-                pivot.rotation.y = -Math.PI / 2;
-
-                // Compute bounding box after rotation
-                const box = new THREE.Box3().setFromObject(pivot);
-                const size = new THREE.Vector3();
-                const center = new THREE.Vector3();
-                box.getSize(size);
-                box.getCenter(center);
-
-                // Scale to fit Grand Hall (target ~6 units tall)
-                const maxDim = Math.max(size.x, size.y, size.z);
-                const scale = 6.0 / maxDim;
-                pivot.scale.set(scale, scale, scale);
-
-                // Re-center after scaling
-                box.setFromObject(pivot);
-                box.getSize(size);
-                box.getCenter(center);
-
-                // Position: centered on X/Z, base on floor
-                pivot.position.x = -center.x;
-                pivot.position.y = -box.min.y;
-                pivot.position.z = -center.z;
-
-                scene.add(pivot);
-
-                // Auto-fit collision box to the actual model with margin
-                collBox.geometry.dispose();
-                collBox.geometry = new THREE.BoxGeometry(size.x + 0.6, size.y, size.z + 0.6);
-                collBox.position.set(0, size.y / 2, 0);
-                collBox.updateMatrixWorld(true);
-            },
-            null,
-            function (err) {
-                console.error('Model load error:', err);
-            }
-        );
-    }
-
     function addFossilCenterpiece(scene, hall, exhibitKey) {
         const data = MUSEUM_DATA.exhibits[exhibitKey];
         if (!data) return;
@@ -1476,8 +1378,6 @@ const Museum = (() => {
 
     function build(scene) {
         buildGrandHall(scene);
-        buildTRexSkeleton(scene);
-        buildWelcomeSign(scene);
 
         const hw = GRAND_HALL_WIDTH / 2;
         const hd = GRAND_HALL_DEPTH / 2;
@@ -1511,115 +1411,5 @@ const Museum = (() => {
 
     function getRooms() { return rooms; }
 
-    // Tilted lectern-style info sign next to the skeleton centerpiece
-    let _welcomeSignFace = null;
-
-    function buildWelcomeSign(scene) {
-        const signX = -2.2, signZ = 0;
-        const signW = 1.6, signH = 1.15;
-        const postHeight = 0.85;
-        const tiltAngle = -0.55; // ~31 degrees, lectern tilt
-
-        // Outer group: position + face toward the skeleton (+X)
-        const signGroup = new THREE.Group();
-        signGroup.position.set(signX, 0, signZ);
-        signGroup.rotation.y = -Math.PI / 2; // local +Z → world +X
-
-        // Base plate
-        const base = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.22, 0.25, 0.04, 12),
-            _darkMetalMat
-        );
-        base.position.y = 0.02;
-        signGroup.add(base);
-
-        // Vertical post
-        const post = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.03, 0.03, postHeight, 8),
-            _darkMetalMat
-        );
-        post.position.y = postHeight / 2;
-        signGroup.add(post);
-
-        // Canvas texture for the reading surface
-        const canvas = document.createElement('canvas');
-        canvas.width = 640;
-        canvas.height = 480;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#1a1712';
-        ctx.fillRect(0, 0, 640, 480);
-        ctx.strokeStyle = '#c9a96e';
-        ctx.lineWidth = 3;
-        ctx.strokeRect(12, 12, 616, 456);
-        ctx.fillStyle = '#c9a96e';
-        ctx.font = 'italic 46px Georgia, serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('Welcome', 320, 80);
-        ctx.strokeStyle = 'rgba(201,169,110,0.4)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(120, 108);
-        ctx.lineTo(520, 108);
-        ctx.stroke();
-        ctx.fillStyle = '#c0b3a1';
-        ctx.font = '24px Georgia, serif';
-        ctx.fillText("Matthew Kim's Museum of", 320, 165);
-        ctx.fillText('Science Communication', 320, 198);
-        ctx.fillStyle = '#a89b8c';
-        ctx.font = 'italic 20px Georgia, serif';
-        ctx.fillText('A Notation in Science Communication ePortfolio', 320, 260);
-        ctx.fillStyle = '#7a7060';
-        ctx.font = '19px Helvetica, sans-serif';
-        ctx.fillText('Click to read the welcome letter', 320, 440);
-        const tex = new THREE.CanvasTexture(canvas);
-
-        // Sub-group for the tilted surface — everything tilts together
-        const surface = new THREE.Group();
-        surface.position.y = postHeight;
-        surface.rotation.x = tiltAngle;
-        signGroup.add(surface);
-
-        // Sign body (solid box — also the raycasting target)
-        const backMat = new THREE.MeshStandardMaterial({ color: 0x1a1712, roughness: 0.4, metalness: 0.3 });
-        const signBox = new THREE.Mesh(
-            new THREE.BoxGeometry(signW, signH, 0.04),
-            backMat
-        );
-        surface.add(signBox);
-
-        // Text overlay on the front face of the box
-        const textPlane = new THREE.Mesh(
-            new THREE.PlaneGeometry(signW - 0.02, signH - 0.02),
-            new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide })
-        );
-        textPlane.position.z = 0.025; // slightly in front of the box face
-        surface.add(textPlane);
-
-        // Gold trim frame edges
-        const trimMat = new THREE.MeshStandardMaterial({ color: 0xc9a96e, roughness: 0.3, metalness: 0.6 });
-        const bw = 0.04; // border width
-        // Top bar
-        surface.add(new THREE.Mesh(new THREE.BoxGeometry(signW + bw * 2, bw, 0.05), trimMat)
-            .translateY(signH / 2 + bw / 2));
-        // Bottom bar
-        surface.add(new THREE.Mesh(new THREE.BoxGeometry(signW + bw * 2, bw, 0.05), trimMat)
-            .translateY(-signH / 2 - bw / 2));
-        // Left bar
-        surface.add(new THREE.Mesh(new THREE.BoxGeometry(bw, signH + bw * 2, 0.05), trimMat)
-            .translateX(-signW / 2 - bw / 2));
-        // Right bar
-        surface.add(new THREE.Mesh(new THREE.BoxGeometry(bw, signH + bw * 2, 0.05), trimMat)
-            .translateX(signW / 2 + bw / 2));
-
-        scene.add(signGroup);
-        signGroup.updateMatrixWorld(true); // critical for raycasting before first render
-
-        _welcomeSignFace = signBox;
-    }
-
-    function getWelcomeSignMesh() {
-        return _welcomeSignFace;
-    }
-
-    return { build, getCollisionWalls, getCurrentRoom, getRooms, getAnimatedLights, getWelcomeSignMesh, WALL_HEIGHT, HALL_WIDTH, HALL_DEPTH };
+    return { build, getCollisionWalls, getCurrentRoom, getRooms, getAnimatedLights, WALL_HEIGHT, HALL_WIDTH, HALL_DEPTH };
 })();

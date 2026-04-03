@@ -187,33 +187,6 @@ canvas {
     pointer-events: none;
 }
 
-/* ===================== CONTROLS LEGEND ===================== */
-#controls-legend {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 0.75rem;
-    line-height: 2;
-    color: rgba(232, 213, 183, 0.7);
-    pointer-events: none;
-    letter-spacing: 0.03em;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
-    background: rgba(0, 0, 0, 0.45);
-    padding: 10px 14px;
-    border-radius: 8px;
-    border: 1px solid rgba(201, 169, 110, 0.15);
-}
-
-#controls-legend .key {
-    font-size: 0.7rem;
-    padding: 2px 6px;
-    margin-right: 3px;
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
-    color: rgba(201, 169, 110, 0.8);
-}
-
 /* ===================== EXHIBIT OVERLAY ===================== */
 #exhibit-overlay {
     position: fixed;

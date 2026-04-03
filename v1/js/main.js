@@ -152,17 +152,6 @@
     updateLoading(65, 'Setting up info wing...');
 
     Exhibits.placeInfoExhibits(scene, museumResult.halls.info);
-
-    // Welcome letter sign — to the left of the skeleton centerpiece
-    Exhibits.registerExhibitMesh(
-        Museum.getWelcomeSignMesh(),
-        {
-            title: MUSEUM_DATA.coverLetter.title,
-            content: MUSEUM_DATA.coverLetter.buildContent(),
-            type: 'coverLetter'
-        }
-    );
-
     updateLoading(78, 'Creating atmosphere...');
 
     createDustParticles();

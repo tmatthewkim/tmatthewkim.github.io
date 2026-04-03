@@ -123,7 +123,7 @@ const Interactions = (() => {
 
     const teleportTargets = {
         grandHall: { x: 0, z: 5, yaw: Math.PI },
-        coverLetter: { x: -1.2, z: 0, yaw: -Math.PI / 2, overlay: true },
+        coverLetter: 'overlay',
         trilobiteWing: { x: -15, z: 0, yaw: Math.PI / 2 },
         archaeopteryxWing: { x: 15, z: 0, yaw: -Math.PI / 2 },
         neanderthalWing: { x: 0, z: -15, yaw: 0 },
@@ -200,21 +200,20 @@ const Interactions = (() => {
         const target = teleportTargets[targetKey];
         if (!target) return;
 
-        closeBrochure();
-
-        if (target.overlay) {
-            // Teleport to sign, then open cover letter overlay
-            Player.teleportTo(target.x, target.z, target.yaw);
+        if (target === 'overlay') {
+            // Open cover letter
+            closeBrochure();
             setTimeout(() => {
                 openOverlay({
                     title: MUSEUM_DATA.coverLetter.title,
                     content: MUSEUM_DATA.coverLetter.buildContent(),
                     type: 'coverLetter'
                 });
-            }, 200);
+            }, 150);
             return;
         }
 
+        closeBrochure();
         Player.teleportTo(target.x, target.z, target.yaw);
         setTimeout(() => {
             Player.lockPointer();
