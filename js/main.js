@@ -163,6 +163,15 @@
         }
     );
 
+    // Bambiraptor sign — to the right of the skeleton centerpiece
+    Exhibits.registerExhibitMesh(
+        Museum.getBambiraptorSignMesh(),
+        {
+            title: MUSEUM_DATA.bambiraptor.title,
+            content: MUSEUM_DATA.bambiraptor.content
+        }
+    );
+
     updateLoading(78, 'Creating atmosphere...');
 
     createDustParticles();

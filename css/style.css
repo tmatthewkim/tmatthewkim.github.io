@@ -98,6 +98,9 @@ canvas {
     line-height: 2;
     color: #c0b3a1;
     margin-bottom: 2rem;
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .key {

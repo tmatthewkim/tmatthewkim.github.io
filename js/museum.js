@@ -1478,6 +1478,7 @@ const Museum = (() => {
         buildGrandHall(scene);
         buildTRexSkeleton(scene);
         buildWelcomeSign(scene);
+        buildBambiraptorSign(scene);
 
         const hw = GRAND_HALL_WIDTH / 2;
         const hd = GRAND_HALL_DEPTH / 2;
@@ -1621,5 +1622,111 @@ const Museum = (() => {
         return _welcomeSignFace;
     }
 
-    return { build, getCollisionWalls, getCurrentRoom, getRooms, getAnimatedLights, getWelcomeSignMesh, WALL_HEIGHT, HALL_WIDTH, HALL_DEPTH };
+    // Tilted lectern-style info sign on the opposite side of the skeleton
+    let _bambiraptorSignFace = null;
+
+    function buildBambiraptorSign(scene) {
+        const signX = 2.2, signZ = 0;
+        const signW = 1.6, signH = 1.15;
+        const postHeight = 0.85;
+        const tiltAngle = -0.55;
+
+        // Outer group: position + face away from skeleton (+X), mirroring welcome sign
+        const signGroup = new THREE.Group();
+        signGroup.position.set(signX, 0, signZ);
+        signGroup.rotation.y = Math.PI / 2;
+
+        // Base plate
+        const base = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.22, 0.25, 0.04, 12),
+            _darkMetalMat
+        );
+        base.position.y = 0.02;
+        signGroup.add(base);
+
+        // Vertical post
+        const post = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.03, 0.03, postHeight, 8),
+            _darkMetalMat
+        );
+        post.position.y = postHeight / 2;
+        signGroup.add(post);
+
+        // Canvas texture for the reading surface
+        const canvas = document.createElement('canvas');
+        canvas.width = 640;
+        canvas.height = 480;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#1a1712';
+        ctx.fillRect(0, 0, 640, 480);
+        ctx.strokeStyle = '#c9a96e';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(12, 12, 616, 456);
+        ctx.fillStyle = '#c9a96e';
+        ctx.font = 'italic 36px Georgia, serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Bambiraptor feinbergi', 320, 80);
+        ctx.strokeStyle = 'rgba(201,169,110,0.4)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(120, 108);
+        ctx.lineTo(520, 108);
+        ctx.stroke();
+        ctx.fillStyle = '#c0b3a1';
+        ctx.font = '24px Georgia, serif';
+        ctx.fillText('Skeleton CAD Model', 320, 165);
+        ctx.fillStyle = '#a89b8c';
+        ctx.font = 'italic 19px Georgia, serif';
+        ctx.fillText('Introduction to Engineering Design', 320, 220);
+        ctx.fillText('Senior Year of High School', 320, 250);
+        ctx.fillStyle = '#7a7060';
+        ctx.font = '19px Helvetica, sans-serif';
+        ctx.fillText('Click to read more', 320, 440);
+        const tex = new THREE.CanvasTexture(canvas);
+
+        // Sub-group for the tilted surface
+        const surface = new THREE.Group();
+        surface.position.y = postHeight;
+        surface.rotation.x = tiltAngle;
+        signGroup.add(surface);
+
+        // Sign body (raycasting target)
+        const backMat = new THREE.MeshStandardMaterial({ color: 0x1a1712, roughness: 0.4, metalness: 0.3 });
+        const signBox = new THREE.Mesh(
+            new THREE.BoxGeometry(signW, signH, 0.04),
+            backMat
+        );
+        surface.add(signBox);
+
+        // Text overlay
+        const textPlane = new THREE.Mesh(
+            new THREE.PlaneGeometry(signW - 0.02, signH - 0.02),
+            new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide })
+        );
+        textPlane.position.z = 0.025;
+        surface.add(textPlane);
+
+        // Gold trim frame edges
+        const trimMat = new THREE.MeshStandardMaterial({ color: 0xc9a96e, roughness: 0.3, metalness: 0.6 });
+        const bw = 0.04;
+        surface.add(new THREE.Mesh(new THREE.BoxGeometry(signW + bw * 2, bw, 0.05), trimMat)
+            .translateY(signH / 2 + bw / 2));
+        surface.add(new THREE.Mesh(new THREE.BoxGeometry(signW + bw * 2, bw, 0.05), trimMat)
+            .translateY(-signH / 2 - bw / 2));
+        surface.add(new THREE.Mesh(new THREE.BoxGeometry(bw, signH + bw * 2, 0.05), trimMat)
+            .translateX(-signW / 2 - bw / 2));
+        surface.add(new THREE.Mesh(new THREE.BoxGeometry(bw, signH + bw * 2, 0.05), trimMat)
+            .translateX(signW / 2 + bw / 2));
+
+        scene.add(signGroup);
+        signGroup.updateMatrixWorld(true);
+
+        _bambiraptorSignFace = signBox;
+    }
+
+    function getBambiraptorSignMesh() {
+        return _bambiraptorSignFace;
+    }
+
+    return { build, getCollisionWalls, getCurrentRoom, getRooms, getAnimatedLights, getWelcomeSignMesh, getBambiraptorSignMesh, WALL_HEIGHT, HALL_WIDTH, HALL_DEPTH };
 })();

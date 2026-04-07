@@ -69,7 +69,7 @@ const Interactions = (() => {
         } else {
             contentEl.classList.remove('overlay-wide');
             overlayTitle.style.display = '';
-            overlayTitle.textContent = data.title;
+            overlayTitle.innerHTML = data.title;
         }
 
         let bodyHTML = '';
@@ -123,7 +123,8 @@ const Interactions = (() => {
 
     const teleportTargets = {
         grandHall: { x: 0, z: 5, yaw: Math.PI },
-        coverLetter: { x: -1.2, z: 0, yaw: -Math.PI / 2, overlay: true },
+        coverLetter: { x: -5.0, z: 0, yaw: -Math.PI / 2 },
+        bambiraptor: { x: 5.0, z: 0, yaw: Math.PI / 2 },
         trilobiteWing: { x: -15, z: 0, yaw: Math.PI / 2 },
         archaeopteryxWing: { x: 15, z: 0, yaw: -Math.PI / 2 },
         neanderthalWing: { x: 0, z: -15, yaw: 0 },
@@ -136,10 +137,11 @@ const Interactions = (() => {
         archaeopteryx_0: { x: 12 + SP * 1, z: -4, yaw: 0 },        // x=17.5
         archaeopteryx_1: { x: 12 + SP * 2, z: 4, yaw: Math.PI },    // x=23
         archaeopteryx_2: { x: 12 + SP * 3, z: -4, yaw: 0 },         // x=28.5
-        // Neanderthal (cz=-23, axis='z'): zPos = -34 + SP*(i+1), even→left wall x=-4, odd→right wall x=4
-        neanderthal_0: { x: -4, z: -34 + SP * 1, yaw: Math.PI / 2 },   // z=-28.5
-        neanderthal_1: { x: 4, z: -34 + SP * 2, yaw: -Math.PI / 2 },   // z=-23
-        neanderthal_2: { x: -4, z: -34 + SP * 3, yaw: Math.PI / 2 },   // z=-17.5
+        // Neanderthal (cz=-23, axis='z'): spacing = 22/(n+1), zPos = -34 + spacing*(i+1)
+        neanderthal_0: { x: -4, z: -34 + 4.4 * 1, yaw: Math.PI / 2 },   // z=-29.6
+        neanderthal_1: { x: 4, z: -34 + 4.4 * 2, yaw: -Math.PI / 2 },   // z=-25.2
+        neanderthal_2: { x: -4, z: -34 + 4.4 * 3, yaw: Math.PI / 2 },   // z=-20.8
+        neanderthal_3: { x: 4, z: -34 + 4.4 * 4, yaw: -Math.PI / 2 },   // z=-16.4
         // Info wing (cz=23, axis='z')
         aboutMe: { x: -4, z: 23, yaw: Math.PI / 2 },
         aboutPortfolio: { x: 4, z: 23, yaw: -Math.PI / 2 },
@@ -203,14 +205,20 @@ const Interactions = (() => {
         closeBrochure();
 
         if (target.overlay) {
-            // Teleport to sign, then open cover letter overlay
             Player.teleportTo(target.x, target.z, target.yaw);
             setTimeout(() => {
-                openOverlay({
-                    title: MUSEUM_DATA.coverLetter.title,
-                    content: MUSEUM_DATA.coverLetter.buildContent(),
-                    type: 'coverLetter'
-                });
+                if (target.overlay === 'bambiraptor') {
+                    openOverlay({
+                        title: MUSEUM_DATA.bambiraptor.title,
+                        content: MUSEUM_DATA.bambiraptor.content
+                    });
+                } else {
+                    openOverlay({
+                        title: MUSEUM_DATA.coverLetter.title,
+                        content: MUSEUM_DATA.coverLetter.buildContent(),
+                        type: 'coverLetter'
+                    });
+                }
             }, 200);
             return;
         }

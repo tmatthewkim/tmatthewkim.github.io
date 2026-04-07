@@ -70,7 +70,10 @@ const Exhibits = (() => {
         return { picture: picture, bars: [topBar, bottomBar, leftBar, rightBar] };
     }
 
+    function stripHtml(str) { return str.replace(/<[^>]*>/g, ''); }
+
     function createFrameTexture(title, subtitle, index, thumbnailKey, onImageLoaded) {
+        var plainTitle = stripHtml(title);
         var canvasW = 512;
         var canvasH = 384;
         var canvas = document.createElement('canvas');
@@ -116,7 +119,7 @@ const Exhibits = (() => {
                 ctx.fillStyle = '#e8d5b7';
                 ctx.font = 'bold 22px Georgia, serif';
                 ctx.textAlign = 'center';
-                ctx.fillText(title, canvasW / 2, canvasH - 29);
+                ctx.fillText(plainTitle, canvasW / 2, canvasH - 29);
                 // Click hint
                 ctx.fillStyle = '#a89b8c';
                 ctx.font = '13px Helvetica, sans-serif';
@@ -149,7 +152,7 @@ const Exhibits = (() => {
         ctx.font = '22px Georgia, serif';
 
         // Word wrap title
-        var words = title.split(' ');
+        var words = plainTitle.split(' ');
         var line = '';
         var yPos = 160;
         var maxWidth = 420;
@@ -252,13 +255,13 @@ const Exhibits = (() => {
 
                 // Alternate walls
                 if (i % 2 === 0) {
-                    createExhibitFrame(scene, xPos, FRAME_Y, wallZ_top, 0, artifact.title, {
+                    createExhibitFrame(scene, xPos, FRAME_Y, wallZ_top, 0, artifact.frameTitle || artifact.title, {
                         ...artifact,
                         exhibitKey,
                         wingName: data.name
                     }, i, artifact.thumbnail);
                 } else {
-                    createExhibitFrame(scene, xPos, FRAME_Y, wallZ_bottom, Math.PI, artifact.title, {
+                    createExhibitFrame(scene, xPos, FRAME_Y, wallZ_bottom, Math.PI, artifact.frameTitle || artifact.title, {
                         ...artifact,
                         exhibitKey,
                         wingName: data.name
@@ -275,13 +278,13 @@ const Exhibits = (() => {
                 const zPos = cz - hd + spacing * (i + 1);
 
                 if (i % 2 === 0) {
-                    createExhibitFrame(scene, wallX_left, FRAME_Y, zPos, Math.PI / 2, artifact.title, {
+                    createExhibitFrame(scene, wallX_left, FRAME_Y, zPos, Math.PI / 2, artifact.frameTitle || artifact.title, {
                         ...artifact,
                         exhibitKey,
                         wingName: data.name
                     }, i, artifact.thumbnail);
                 } else {
-                    createExhibitFrame(scene, wallX_right, FRAME_Y, zPos, -Math.PI / 2, artifact.title, {
+                    createExhibitFrame(scene, wallX_right, FRAME_Y, zPos, -Math.PI / 2, artifact.frameTitle || artifact.title, {
                         ...artifact,
                         exhibitKey,
                         wingName: data.name

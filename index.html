@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Matthew Kim's Museum of Science Communication</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=4">
 </head>
 <body>
     <!-- Loading Screen -->
@@ -28,11 +28,12 @@
             <h1>Museum of Science Communication</h1>
             <h2>A Notation in Science Communication (NSC) ePortfolio</h2>
             <p class="start-instructions">
-                <strong>Controls:</strong><br>
+                <strong>How to Navigate:</strong><br>
+                You can explore the museum freely using the controls below, or press <span class="key">M</span> at any time to open the <strong>Museum Map</strong>, which lets you jump directly to any artifact, just like clicking links on a regular website.<br><br>
                 <span class="key">W A S D</span> or <span class="key">Arrow Keys</span> — Move<br>
                 <span class="key">Mouse</span> — Look around<br>
                 <span class="key">Click</span> — View exhibits<br>
-                <span class="key">M</span> — Museum map &amp; guide<br>
+                <span class="key">M</span> — Museum map &amp; guide (click any artifact to jump there)<br>
                 <span class="key">ESC</span> — Close / Release mouse
             </p>
             <button id="start-button">Enter Museum</button>
@@ -64,6 +65,12 @@
             <h1 class="brochure-title">Matthew Kim's Museum of Science Communication</h1>
             <p class="brochure-subtitle">Visitor Guide &amp; Map</p>
 
+            <p style="color:#c0b3a1; font-size:0.9rem; line-height:1.6; margin:0 0 1rem; text-align:center;">
+                Click any room on the floor plan or any artifact below to jump there instantly.<br>
+                You can also close this map and walk through the museum freely using <span class="key">WASD</span> and <span class="key">Mouse</span>.<br>
+                Press <span class="key">M</span> at any time to reopen this guide.
+            </p>
+
             <div class="brochure-map">
                 <!-- Cross-shaped floor plan -->
                 <div class="map-wing map-north" data-teleport="neanderthalWing">
@@ -86,8 +93,9 @@
             <div class="brochure-sections">
                 <!-- Welcome -->
                 <div class="brochure-section">
-                    <h3>Welcome</h3>
+                    <h3>Grand Hall</h3>
                     <a href="#" data-teleport="coverLetter" class="brochure-link">Read Welcome Letter</a>
+                    <a href="#" data-teleport="bambiraptor" class="brochure-link"><em>Bambiraptor feinbergi</em> Skeleton CAD Model</a>
                 </div>
 
                 <!-- Trilobite Wing -->
@@ -95,7 +103,7 @@
                     <h3>Trilobite Wing — Reveal</h3>
                     <a href="#" data-teleport="trilobite_0" class="brochure-link">Paleostoric YouTube Video</a>
                     <a href="#" data-teleport="trilobite_1" class="brochure-link">PaleoPals Storytelling Podcast</a>
-                    <a href="#" data-teleport="trilobite_2" class="brochure-link">Artifact 3</a>
+                    <a href="#" data-teleport="trilobite_2" class="brochure-link"><em>King Clucky</em> Picture Book</a>
                 </div>
 
                 <!-- Archaeopteryx Wing -->
@@ -103,15 +111,16 @@
                     <h3>Archaeopteryx Wing — Bridge</h3>
                     <a href="#" data-teleport="archaeopteryx_0" class="brochure-link">Project Biosecurity</a>
                     <a href="#" data-teleport="archaeopteryx_1" class="brochure-link">The Remotoscope</a>
-                    <a href="#" data-teleport="archaeopteryx_2" class="brochure-link">Artifact 3</a>
+                    <a href="#" data-teleport="archaeopteryx_2" class="brochure-link">AI-Driven Vaccine Allocation</a>
                 </div>
 
                 <!-- Neanderthal Wing -->
                 <div class="brochure-section">
                     <h3>Neanderthal Wing — Build</h3>
                     <a href="#" data-teleport="neanderthal_0" class="brochure-link">PWR 91NSC Literature Review</a>
-                    <a href="#" data-teleport="neanderthal_1" class="brochure-link">Artifact 2</a>
-                    <a href="#" data-teleport="neanderthal_2" class="brochure-link">Artifact 3</a>
+                    <a href="#" data-teleport="neanderthal_1" class="brochure-link">Medical AI Workshop Paper</a>
+                    <a href="#" data-teleport="neanderthal_2" class="brochure-link">Medical AI Oral Presentation</a>
+                    <a href="#" data-teleport="neanderthal_3" class="brochure-link">Bio-X Research Poster</a>
                 </div>
 
                 <!-- Info Wing -->
@@ -144,13 +153,13 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
     <!-- App Scripts -->
-    <script src="js/wing-images.js"></script>
-    <script src="js/data.js"></script>
-    <script src="js/museum.js"></script>
-    <script src="js/player.js"></script>
-    <script src="js/exhibits.js"></script>
-    <script src="js/interactions.js"></script>
-    <script src="js/npc.js"></script>
-    <script src="js/main.js"></script>
+    <script src="js/wing-images.js?v=4"></script>
+    <script src="js/data.js?v=4"></script>
+    <script src="js/museum.js?v=4"></script>
+    <script src="js/player.js?v=4"></script>
+    <script src="js/exhibits.js?v=4"></script>
+    <script src="js/interactions.js?v=4"></script>
+    <script src="js/npc.js?v=4"></script>
+    <script src="js/main.js?v=4"></script>
 </body>
 </html>
