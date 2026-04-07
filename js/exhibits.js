@@ -273,9 +273,12 @@ const Exhibits = (() => {
             const wallX_left = cx - hw + wallOffset;
             const wallX_right = cx + hw - wallOffset;
 
+            // Pair artifacts across from each other: 0(left) & 1(right) at row 1, 2(left) & 3(right) at row 2, etc.
+            const numRows = Math.ceil(artifacts.length / 2);
             artifacts.forEach((artifact, i) => {
-                const spacing = Museum.HALL_DEPTH / (artifacts.length + 1);
-                const zPos = cz - hd + spacing * (i + 1);
+                const row = Math.floor(i / 2);
+                const spacing = Museum.HALL_DEPTH / (numRows + 1);
+                const zPos = cz - hd + spacing * (row + 1);
 
                 if (i % 2 === 0) {
                     createExhibitFrame(scene, wallX_left, FRAME_Y, zPos, Math.PI / 2, artifact.frameTitle || artifact.title, {

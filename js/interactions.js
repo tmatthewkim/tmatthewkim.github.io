@@ -137,11 +137,11 @@ const Interactions = (() => {
         archaeopteryx_0: { x: 12 + SP * 1, z: -4, yaw: 0 },        // x=17.5
         archaeopteryx_1: { x: 12 + SP * 2, z: 4, yaw: Math.PI },    // x=23
         archaeopteryx_2: { x: 12 + SP * 3, z: -4, yaw: 0 },         // x=28.5
-        // Neanderthal (cz=-23, axis='z'): spacing = 22/(n+1), zPos = -34 + spacing*(i+1)
-        neanderthal_0: { x: -4, z: -34 + 4.4 * 1, yaw: Math.PI / 2 },   // z=-29.6
-        neanderthal_1: { x: 4, z: -34 + 4.4 * 2, yaw: -Math.PI / 2 },   // z=-25.2
-        neanderthal_2: { x: -4, z: -34 + 4.4 * 3, yaw: Math.PI / 2 },   // z=-20.8
-        neanderthal_3: { x: 4, z: -34 + 4.4 * 4, yaw: -Math.PI / 2 },   // z=-16.4
+        // Neanderthal (cz=-23, axis='z'): paired rows, spacing = 22/3 ≈ 7.33
+        neanderthal_0: { x: -4, z: -34 + 7.33 * 1, yaw: Math.PI / 2 },    // row 0 left
+        neanderthal_1: { x: 4, z: -34 + 7.33 * 1, yaw: -Math.PI / 2 },    // row 0 right
+        neanderthal_2: { x: -4, z: -34 + 7.33 * 2, yaw: Math.PI / 2 },    // row 1 left
+        neanderthal_3: { x: 4, z: -34 + 7.33 * 2, yaw: -Math.PI / 2 },    // row 1 right
         // Info wing (cz=23, axis='z')
         aboutMe: { x: -4, z: 23, yaw: Math.PI / 2 },
         aboutPortfolio: { x: 4, z: 23, yaw: -Math.PI / 2 },
