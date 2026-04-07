@@ -8,20 +8,22 @@ const MUSEUM_DATA = {
     coverLetter: {
         title: "Welcome",
         buildContent: function() {
-            var img = (typeof WELCOME_IMAGE_DATA !== 'undefined') ? WELCOME_IMAGE_DATA : {};
             return '' +
             /* ---- Hook ---- */
             '<p style="text-align:center; font-size:1.8rem; font-weight:bold; color:#e8d5b7; font-family:Georgia,serif; line-height:1.3; font-style:italic; letter-spacing:0.02em; margin:0 0 1rem;">' +
                 'We can learn a lot about humans from dead birds.' +
             '</p>' +
 
-            /* ---- Section 1: text left, pic1 right ---- */
-            '<div style="display:flex; gap:1rem; margin-bottom:1rem;">' +
-                '<div style="flex:1;">' +
-                    '<p style="margin:0;">Not <em>those</em> birds, rather the extinct kind: dinosaurs. A particularly poignant example is Sue the <em>Tyrannosaurus Rex</em>. She is a skeleton of scars. Lumps on her ribs. An oversized leg bone. Punctured holes on her lower jaw. These oddities on her bones are not superficial marks but deep-rooted pains forgotten for 67 million years and only rediscovered by chance in the South Dakota Badlands. Broken ribs. An infected fibula. Holes of the parasitic infection trichomonosis\u2026 eventually leading to death by starvation. These scars tell a tale of struggles and downfalls that seem too much to bear.</p>' +
+            /* ---- Section 1: text, then pics below ---- */
+            '<p style="margin:0 0 1rem;">Not <em>those</em> birds, rather the extinct kind: dinosaurs. A particularly poignant example is Sue the <em>Tyrannosaurus Rex</em>. She is a skeleton of scars. Lumps on her ribs. An oversized leg bone. Punctured holes on her lower jaw. These oddities on her bones are not superficial marks but deep-rooted pains forgotten for 67 million years and only rediscovered by chance in the South Dakota Badlands. Broken ribs. An infected fibula. Holes of the parasitic infection trichomonosis\u2026 eventually leading to death by starvation. These scars tell a tale of struggles and downfalls that seem too much to bear.</p>' +
+            '<div style="display:flex; gap:0.75rem; margin-bottom:1rem;">' +
+                '<div style="flex:1; text-align:center;">' +
+                    '<img src="assets/images/welcome_letter/pic1_2.png" style="width:100%; border-radius:4px; display:block;">' +
+                    '<p style="margin:0.4rem 0 0; font-size:0.9rem; color:#a89b8c; font-style:italic;">Me with Sue in 2016</p>' +
                 '</div>' +
-                '<div style="flex:0 0 40%;">' +
-                    (img.pic1 ? '<img src="' + img.pic1 + '" style="width:100%; border-radius:4px; display:block;">' : '') +
+                '<div style="flex:1; text-align:center;">' +
+                    '<img src="assets/images/welcome_letter/pic1_3.png" style="width:100%; border-radius:4px; display:block;">' +
+                    '<p style="margin:0.4rem 0 0; font-size:0.9rem; color:#a89b8c; font-style:italic;">Me with Sue in 2025</p>' +
                 '</div>' +
             '</div>' +
 
@@ -31,7 +33,7 @@ const MUSEUM_DATA = {
             /* ---- Section 3: pic2 left, text right ---- */
             '<div style="display:flex; gap:1rem; margin-bottom:1rem;">' +
                 '<div style="flex:0 0 35%;">' +
-                    (img.pic2 ? '<img src="' + img.pic2 + '" style="width:100%; border-radius:4px; display:block;">' : '') +
+                    '<img src="assets/images/welcome_letter/pic2.png" style="width:100%; border-radius:4px; display:block;">' +
                 '</div>' +
                 '<div style="flex:1; display:flex; flex-direction:column; justify-content:center;">' +
                     '<p style="margin:0 0 0.6rem;">That curiosity eventually turned inward.</p>' +
@@ -46,10 +48,10 @@ const MUSEUM_DATA = {
             /* ---- Section 5: two images side by side ---- */
             '<div style="display:flex; gap:0.8rem; margin-bottom:1rem;">' +
                 '<div style="flex:1;">' +
-                    (img.pic3 ? '<img src="' + img.pic3 + '" style="width:100%; display:block; border-radius:4px;">' : '') +
+                    '<img src="assets/images/welcome_letter/pic3.png" style="width:100%; display:block; border-radius:4px;">' +
                 '</div>' +
                 '<div style="flex:1;">' +
-                    (img.pic4 ? '<img src="' + img.pic4 + '" style="width:100%; display:block; border-radius:4px;">' : '') +
+                    '<img src="assets/images/welcome_letter/pic4.png" style="width:100%; display:block; border-radius:4px;">' +
                 '</div>' +
             '</div>' +
 
